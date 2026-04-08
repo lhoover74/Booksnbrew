@@ -47,7 +47,7 @@ export async function onRequest(context) {
   const protectClientApi =
     path.startsWith("/api/client/me") ||
     path.startsWith("/api/client/change-password");
-
+    path.startsWith("/api/client/reply")
   if (protectAdminPage || protectAdminApi) {
     const adminToken = cookies.bb_admin_session;
     const validAdminToken = await expectedAdminToken(env);
