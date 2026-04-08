@@ -16,7 +16,7 @@
               <span class="eyebrow">Client Portal</span>
               <h1 class="page-title" style="margin-bottom:10px;">Your Project</h1>
               <p class="page-copy">
-                View your project details, current status, updates, and progress in one place.
+                View your project details, current status, updates, invoices, and progress in one place.
               </p>
             </div>
             <button id="logoutBtn" class="btn secondary">Log Out</button>
@@ -49,6 +49,12 @@
           <span class="eyebrow">Project tracker</span>
           <h2 class="section-title">Progress</h2>
           <div id="projectTrackerWrap" style="margin-top:18px;"></div>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Invoices</span>
+          <h2 class="section-title">Billing</h2>
+          <div id="portalInvoices" style="display:grid; gap:12px; margin-top:16px;"></div>
         </div>
 
         <div class="grid-2" style="margin-top:22px;">
@@ -181,6 +187,7 @@
 
         const lead = data.lead;
         const project = data.project || null;
+        const invoices = data.invoices || [];
         const notes = data.notes || [];
         const reminders = data.reminders || [];
         const messages = data.messages || [];
@@ -235,6 +242,22 @@
             </div>
           `
           : `<div class="contact-detail" style="display:block;">No project tracker has been published yet.</div>`;
+
+        document.getElementById("portalInvoices").innerHTML =
+          invoices.length
+            ? invoices.map(item => `
+                <div class="contact-detail" style="display:block;">
+                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                    ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
+                  </div>
+                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                    $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
+                  </div>
+                  <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
+                  ${item.payment_url ? `<a class="btn primary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">Pay Now</a>` : ""}
+                </div>
+              `).join("")
+            : `<div class="contact-detail" style="display:block;">No invoices available yet.</div>`;
 
         document.getElementById("portalNotes").innerHTML =
           notes.length
