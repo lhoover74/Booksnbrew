@@ -3,94 +3,250 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Project | Books and Brews</title>
+  <title>Manage Lead | Books and Brews</title>
   <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
 <body>
   <div class="site-shell">
     <section class="page-hero" style="padding-bottom:20px;">
       <div class="container">
-        <div class="section-card">
-          <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-            <div>
-              <span class="eyebrow">Client Portal</span>
-              <h1 class="page-title" style="margin-bottom:10px;">Your Project</h1>
-              <p class="page-copy">
-                View your project details, current status, updates, and progress in one place.
-              </p>
-            </div>
-            <button id="logoutBtn" class="btn secondary">Log Out</button>
-          </div>
+        <div class="section-card" style="
+          background:
+            radial-gradient(circle at top right, rgba(199,144,88,.14), transparent 30%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+        ">
+          <span class="eyebrow">Admin CRM</span>
+          <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
+          <p class="page-copy" style="max-width:760px;">
+            Review the lead, update their pipeline status, add internal notes, set reminders,
+            schedule a follow-up call, and manage project progress from one clean dashboard.
+          </p>
         </div>
       </div>
     </section>
 
-    <section class="section compact">
+    <section class="section compact" style="padding-top:10px;">
       <div class="container">
-        <div id="portalError" class="section-card" style="display:none; margin-bottom:22px;">
-          <p id="portalErrorText" style="margin:0;"></p>
+        <div id="errorBox" class="section-card" style="display:none; margin-bottom:22px; border-color:rgba(190,80,80,.3);">
+          <p id="errorText" style="margin:0;color:#f2c4c4;"></p>
         </div>
 
-        <div class="grid-2">
-          <div class="section-card">
-            <span class="eyebrow">Overview</span>
-            <h2 id="portalName" class="section-title">Loading...</h2>
-            <div id="portalMeta" style="display:grid; gap:14px; margin-top:18px;"></div>
+        <div class="grid-2" style="align-items:start;">
+          <div class="section-card" style="
+            background:
+              radial-gradient(circle at top right, rgba(199,144,88,.12), transparent 35%),
+              linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+          ">
+            <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <span class="eyebrow">Lead overview</span>
+                <h2 id="leadName" class="section-title" style="margin-bottom:8px;">Loading...</h2>
+                <p id="leadEmail" style="margin:0;color:var(--muted);"></p>
+              </div>
+              <div id="leadTag" style="
+                padding:8px 12px;
+                border-radius:999px;
+                border:1px solid rgba(199,144,88,.28);
+                color:var(--accent);
+                background:rgba(199,144,88,.08);
+                font-size:.82rem;
+                font-weight:700;
+                letter-spacing:.03em;
+                white-space:nowrap;
+              ">Loading</div>
+            </div>
+
+            <div id="leadMeta" style="margin-top:22px; display:grid; gap:14px;"></div>
+
+            <div style="margin-top:24px; display:flex; gap:12px; flex-wrap:wrap;">
+              <a id="leadEmailBtn" href="#" class="btn primary">Email Lead</a>
+              <a href="/admin/leads.html" class="btn secondary">Back to Leads</a>
+              <a href="/admin/client-access.html" class="btn secondary">Create Client Portal Access</a>
+            </div>
           </div>
 
           <div class="section-card">
-            <span class="eyebrow">Project info</span>
-            <h2 class="section-title">Details</h2>
-            <div id="portalDetails" style="display:grid; gap:14px; margin-top:18px;"></div>
+            <span class="eyebrow">Pipeline actions</span>
+            <h2 class="section-title">Update this lead</h2>
+
+            <form id="statusForm" style="margin-top:18px;">
+              <label for="statusSelect">Lead Status</label>
+              <select id="statusSelect" name="status" required>
+                <option>New</option>
+                <option>Contacted</option>
+                <option>Qualified</option>
+                <option>Proposal Sent</option>
+                <option>Won</option>
+                <option>Lost</option>
+              </select>
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Save Status</button>
+              </div>
+
+              <p id="statusMsg" class="form-response" aria-live="polite"></p>
+            </form>
+
+            <div style="
+              margin-top:24px;
+              padding:18px;
+              border:1px solid var(--border);
+              border-radius:16px;
+              background:rgba(255,255,255,.02);
+            ">
+              <div class="meta" style="margin-bottom:8px;">Quick note</div>
+              <p style="margin:0;color:var(--muted);line-height:1.75;">
+                Keep lead statuses current so your dashboard, pipeline, and follow-ups stay organized.
+              </p>
+            </div>
           </div>
         </div>
 
         <div class="section-card" style="margin-top:22px;">
           <span class="eyebrow">Project tracker</span>
-          <h2 class="section-title">Progress</h2>
-          <div id="projectTrackerWrap" style="margin-top:18px;"></div>
-        </div>
+          <h2 class="section-title">Manage project progress</h2>
 
-        <div class="grid-2" style="margin-top:22px;">
-          <div class="section-card">
-            <span class="eyebrow">Updates</span>
-            <h2 class="section-title">Notes</h2>
-            <div id="portalNotes" style="display:grid; gap:12px; margin-top:16px;"></div>
-          </div>
+          <form id="projectForm" style="margin-top:18px;">
+            <label for="projectTitle">Project Title</label>
+            <input id="projectTitle" name="title" type="text" placeholder="Website Build" required />
 
-          <div class="section-card">
-            <span class="eyebrow">Upcoming</span>
-            <h2 class="section-title">Reminders</h2>
-            <div id="portalReminders" style="display:grid; gap:12px; margin-top:16px;"></div>
-          </div>
-        </div>
+            <label for="projectStage" style="margin-top:14px;">Stage</label>
+            <select id="projectStage" name="stage" required>
+              <option>Inquiry Received</option>
+              <option>Strategy</option>
+              <option>Design</option>
+              <option>Development</option>
+              <option>Review</option>
+              <option>Revisions</option>
+              <option>Launch</option>
+              <option>Complete</option>
+            </select>
 
-        <div class="section-card" style="margin-top:22px;">
-          <span class="eyebrow">Security</span>
-          <h2 class="section-title">Change Password</h2>
+            <label for="projectProgress" style="margin-top:14px;">Progress %</label>
+            <input id="projectProgress" name="progress" type="number" min="0" max="100" required />
 
-          <form id="changePasswordForm" style="margin-top:18px;">
-            <label for="currentPassword">Current Password</label>
-            <input id="currentPassword" name="currentPassword" type="password" required />
+            <label for="projectTargetDate" style="margin-top:14px;">Target Date</label>
+            <input id="projectTargetDate" name="targetDate" type="date" />
 
-            <label for="portalNewPassword" style="margin-top:14px;">New Password</label>
-            <input id="portalNewPassword" name="newPassword" type="password" required />
-
-            <label for="portalConfirmPassword" style="margin-top:14px;">Confirm New Password</label>
-            <input id="portalConfirmPassword" name="confirmPassword" type="password" required />
+            <label for="projectMilestone" style="margin-top:14px;">Next Milestone</label>
+            <input id="projectMilestone" name="nextMilestone" type="text" placeholder="Homepage design review" />
 
             <div style="margin-top:18px;">
-              <button type="submit" class="btn primary">Update Password</button>
+              <button type="submit" class="btn primary">Save Project Tracker</button>
             </div>
 
-            <p id="changePasswordMsg" class="form-response" aria-live="polite"></p>
+            <p id="projectMsg" class="form-response" aria-live="polite"></p>
           </form>
+        </div>
+
+        <div class="grid-2" style="margin-top:22px; align-items:start;">
+          <div class="section-card">
+            <span class="eyebrow">Lead details</span>
+            <h2 class="section-title">Project information</h2>
+
+            <div id="leadDetails" style="display:grid; gap:14px; margin-top:18px;"></div>
+
+            <div style="margin-top:22px;">
+              <label>Message</label>
+              <div id="leadMessage" class="contact-detail" style="display:block; min-height:90px;"></div>
+            </div>
+
+            <div style="margin-top:18px;">
+              <label>Project Details</label>
+              <div id="leadProjectDetails" class="contact-detail" style="display:block; min-height:90px;"></div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Internal notes</span>
+            <h2 class="section-title">Track conversations</h2>
+
+            <form id="noteForm" style="margin-top:18px;">
+              <label for="noteInput">Add Note</label>
+              <textarea
+                id="noteInput"
+                name="note"
+                placeholder="Write an internal note about this lead..."
+                required
+              ></textarea>
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Add Note</button>
+              </div>
+
+              <p id="noteMsg" class="form-response" aria-live="polite"></p>
+            </form>
+
+            <div style="margin-top:24px;">
+              <label>Notes History</label>
+              <div id="notesList" style="display:grid; gap:12px; margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:22px; align-items:start;">
+          <div class="section-card">
+            <span class="eyebrow">Follow-up system</span>
+            <h2 class="section-title">Set reminders</h2>
+
+            <form id="reminderForm" style="margin-top:18px;">
+              <label for="remindAt">Reminder Date & Time</label>
+              <input id="remindAt" name="remindAt" type="datetime-local" required />
+
+              <label for="reminderNote" style="margin-top:14px;">Reminder Note</label>
+              <input
+                id="reminderNote"
+                name="note"
+                type="text"
+                placeholder="Optional reminder note"
+              />
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Set Reminder</button>
+              </div>
+
+              <p id="reminderMsg" class="form-response" aria-live="polite"></p>
+            </form>
+
+            <div style="margin-top:24px;">
+              <label>Upcoming Reminders</label>
+              <div id="remindersList" style="display:grid; gap:12px; margin-top:12px;"></div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Booking</span>
+            <h2 class="section-title">Schedule a call</h2>
+
+            <form id="bookingForm" style="margin-top:18px;">
+              <label for="bookingName">Name</label>
+              <input id="bookingName" name="name" placeholder="Lead name" required />
+
+              <label for="bookingEmail" style="margin-top:14px;">Email</label>
+              <input id="bookingEmail" name="email" type="email" placeholder="Lead email" required />
+
+              <label for="bookingDate" style="margin-top:14px;">Date & Time</label>
+              <input id="bookingDate" name="date" type="datetime-local" required />
+
+              <label for="bookingNotes" style="margin-top:14px;">Call Notes</label>
+              <input id="bookingNotes" name="notes" placeholder="Optional notes for the booking" />
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Schedule Call</button>
+              </div>
+
+              <p id="bookingMsg" class="form-response" aria-live="polite"></p>
+            </form>
+          </div>
         </div>
       </div>
     </section>
   </div>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const leadId = params.get("id");
+
     function escapeHtml(value) {
       return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -109,7 +265,35 @@
       }
     }
 
-    function block(label, value) {
+    function autoTag(lead) {
+      if (lead?.budget_range && lead.budget_range.includes("5000")) return "🔥 High Value";
+      if (lead?.budget_range && lead.budget_range.includes("$5,000")) return "🔥 High Value";
+      if (lead?.project_type) return `📌 ${lead.project_type}`;
+      if (lead?.form_type === "quote") return "📄 Quote Lead";
+      return "General";
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      const contentType = response.headers.get("content-type") || "";
+      const isJson = contentType.includes("application/json");
+      const data = isJson ? await response.json() : null;
+
+      if (!response.ok) {
+        throw new Error(data?.error || `Request failed with status ${response.status}`);
+      }
+
+      return data;
+    }
+
+    function metaRow(label, value) {
       return `
         <div style="
           padding:14px 16px;
@@ -124,124 +308,154 @@
     }
 
     function showError(message) {
-      const box = document.getElementById("portalError");
-      const text = document.getElementById("portalErrorText");
+      const box = document.getElementById("errorBox");
+      const text = document.getElementById("errorText");
       text.textContent = message;
       box.style.display = "block";
     }
 
-    async function loadPortal() {
+    async function loadLead() {
+      if (!leadId) {
+        showError("Missing lead ID.");
+        return;
+      }
+
       try {
-        const response = await fetch("/api/client/me", {
-          headers: { Accept: "application/json" }
-        });
+        const data = await fetchJson(`/api/leads/${leadId}`);
+        const lead = data.lead;
 
-        const data = await response.json();
-
-        if (!response.ok || !data.ok) {
-          showError(data.error || "Unable to load portal.");
+        if (!lead) {
+          showError("Lead not found.");
           return;
         }
 
-        const lead = data.lead;
-        const project = data.project || null;
-        const notes = data.notes || [];
-        const reminders = data.reminders || [];
+        document.getElementById("leadName").textContent = lead.name || "Lead";
+        document.getElementById("leadEmail").textContent = lead.email || "";
+        document.getElementById("leadTag").textContent = autoTag(lead);
 
-        document.getElementById("portalName").textContent = lead.name || "Client";
-
-        document.getElementById("portalMeta").innerHTML = [
-          block("Email", lead.email || "—"),
-          block("Status", lead.status || "New"),
-          block("Priority", lead.priority || "Normal"),
-          block("Submitted", formatDate(lead.submitted_at))
+        document.getElementById("leadMeta").innerHTML = [
+          metaRow("Email", lead.email || "—"),
+          metaRow("Phone", lead.phone || "Not provided"),
+          metaRow("Form Type", lead.form_type || "—"),
+          metaRow("Status", lead.status || "New"),
+          metaRow("Priority", lead.priority || "Normal"),
+          metaRow("Submitted", formatDate(lead.submitted_at)),
+          metaRow("Source Page", lead.source_page || "—")
         ].join("");
 
-        document.getElementById("portalDetails").innerHTML = [
-          block("Business Name", lead.business_name || "Not provided"),
-          block("Project Type", lead.project_type || "Not provided"),
-          block("Budget Range", lead.budget_range || "Not provided"),
-          block("Source Page", lead.source_page || "—")
+        document.getElementById("leadDetails").innerHTML = [
+          metaRow("Business Name", lead.business_name || "Not provided"),
+          metaRow("Project Type", lead.project_type || "Not provided"),
+          metaRow("Budget Range", lead.budget_range || "Not provided")
         ].join("");
 
-        document.getElementById("projectTrackerWrap").innerHTML = project
-          ? `
-            <div style="display:grid; gap:14px;">
-              ${block("Project Title", project.title || "—")}
-              ${block("Current Stage", project.stage || "—")}
-              ${block("Target Date", formatDate(project.target_date))}
-              ${block("Next Milestone", project.next_milestone || "—")}
+        document.getElementById("leadMessage").innerHTML =
+          escapeHtml(lead.message || "—").replace(/\n/g, "<br>");
 
-              <div style="
-                padding:18px;
-                border:1px solid var(--border);
-                border-radius:14px;
-                background:rgba(255,255,255,.02);
-              ">
-                <div class="meta" style="margin-bottom:8px;">Progress</div>
-                <div style="
-                  width:100%;
-                  height:14px;
-                  background:rgba(255,255,255,.08);
-                  border-radius:999px;
-                  overflow:hidden;
-                ">
-                  <div style="
-                    width:${Number(project.progress) || 0}%;
-                    height:100%;
-                    background:linear-gradient(90deg, #c79058, #e0b07d);
-                    border-radius:999px;
-                  "></div>
-                </div>
-                <div style="margin-top:10px;">${Number(project.progress) || 0}% complete</div>
-              </div>
-            </div>
-          `
-          : `<div class="contact-detail" style="display:block;">No project tracker has been published yet.</div>`;
+        document.getElementById("leadProjectDetails").innerHTML =
+          escapeHtml(lead.project_details || "—").replace(/\n/g, "<br>");
 
-        document.getElementById("portalNotes").innerHTML =
-          notes.length
-            ? notes.map(note => `
-                <div class="contact-detail" style="display:block;">
-                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-                    ${escapeHtml(formatDate(note.created_at))}
-                  </div>
-                  <div>${escapeHtml(note.note || "")}</div>
-                </div>
-              `).join("")
-            : `<div class="contact-detail" style="display:block;">No project notes yet.</div>`;
-
-        document.getElementById("portalReminders").innerHTML =
-          reminders.length
-            ? reminders.map(reminder => `
-                <div class="contact-detail" style="display:block;">
-                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-                    ${escapeHtml(formatDate(reminder.remind_at))}
-                  </div>
-                  <div>${escapeHtml(reminder.note || "No note")}</div>
-                </div>
-              `).join("")
-            : `<div class="contact-detail" style="display:block;">No reminders available.</div>`;
+        document.getElementById("leadEmailBtn").href = `mailto:${lead.email || ""}`;
+        document.getElementById("statusSelect").value = lead.status || "New";
+        document.getElementById("bookingName").value = lead.name || "";
+        document.getElementById("bookingEmail").value = lead.email || "";
       } catch (error) {
-        showError("Unable to load portal.");
+        showError(error.message || "Unable to load lead.");
       }
     }
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await fetch("/api/client/logout", { method: "POST" });
-      window.location.href = "/client/login.html";
-    });
+    async function loadProject() {
+      try {
+        const response = await fetchJson(`/api/projects/by-lead?leadId=${leadId}`);
+        const project = response.project;
 
-    document.getElementById("changePasswordForm").addEventListener("submit", async (event) => {
+        if (!project) return;
+
+        document.getElementById("projectTitle").value = project.title || "";
+        document.getElementById("projectStage").value = project.stage || "Inquiry Received";
+        document.getElementById("projectProgress").value = project.progress ?? 0;
+        document.getElementById("projectTargetDate").value = project.target_date
+          ? String(project.target_date).slice(0, 10)
+          : "";
+        document.getElementById("projectMilestone").value = project.next_milestone || "";
+      } catch (error) {}
+    }
+
+    async function loadNotes() {
+      const list = document.getElementById("notesList");
+
+      try {
+        const response = await fetchJson(`/api/get-notes?leadId=${leadId}`);
+        const notes = response.notes || [];
+
+        list.innerHTML = notes.length
+          ? notes.map(note => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(formatDate(note.created_at))}
+                </div>
+                <div style="line-height:1.8;">${escapeHtml(note.note || "")}</div>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No notes yet.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load notes.</div>`;
+      }
+    }
+
+    async function loadReminders() {
+      const list = document.getElementById("remindersList");
+
+      try {
+        const response = await fetchJson(`/api/reminders-get?leadId=${leadId}`);
+        const reminders = response.reminders || [];
+
+        list.innerHTML = reminders.length
+          ? reminders.map(reminder => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(formatDate(reminder.remind_at))}
+                </div>
+                <div style="line-height:1.8;">${escapeHtml(reminder.note || "No note")}</div>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No reminders set.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load reminders.</div>`;
+      }
+    }
+
+    document.getElementById("statusForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-
-      const msg = document.getElementById("changePasswordMsg");
+      const msg = document.getElementById("statusMsg");
       msg.textContent = "";
 
       try {
         const form = new FormData(event.target);
+        form.append("id", leadId);
 
-        const response = await fetch("/api/client/change-password", {
+        await fetchJson("/api/leads/update-status", {
+          method: "POST",
+          body: form
+        });
+
+        msg.textContent = "Status updated successfully.";
+        await loadLead();
+      } catch (error) {
+        msg.textContent = error.message || "Unable to update status.";
+      }
+    });
+
+    document.getElementById("projectForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("projectMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        const response = await fetch("/api/projects/upsert", {
           method: "POST",
           body: form
         });
@@ -249,18 +463,86 @@
         const data = await response.json();
 
         if (!response.ok || !data.ok) {
-          msg.textContent = data.error || "Unable to update password.";
+          msg.textContent = data.error || "Unable to save project.";
           return;
         }
 
-        msg.textContent = data.message || "Password updated successfully.";
-        event.target.reset();
+        msg.textContent = "Project tracker saved successfully.";
       } catch (error) {
-        msg.textContent = "Unable to update password right now.";
+        msg.textContent = "Unable to save project right now.";
       }
     });
 
-    loadPortal();
+    document.getElementById("noteForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("noteMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        await fetchJson("/api/notes/add", {
+          method: "POST",
+          body: form
+        });
+
+        event.target.reset();
+        msg.textContent = "Note added successfully.";
+        await loadNotes();
+      } catch (error) {
+        msg.textContent = error.message || "Unable to add note.";
+      }
+    });
+
+    document.getElementById("reminderForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("reminderMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        await fetchJson("/api/reminders-add", {
+          method: "POST",
+          body: form
+        });
+
+        event.target.reset();
+        msg.textContent = "Reminder set successfully.";
+        await loadReminders();
+      } catch (error) {
+        msg.textContent = error.message || "Unable to set reminder.";
+      }
+    });
+
+    document.getElementById("bookingForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("bookingMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        await fetchJson("/api/bookings-add", {
+          method: "POST",
+          body: form
+        });
+
+        msg.textContent = "Call scheduled successfully.";
+        document.getElementById("bookingDate").value = "";
+        document.getElementById("bookingNotes").value = "";
+      } catch (error) {
+        msg.textContent = error.message || "Unable to schedule call.";
+      }
+    });
+
+    loadLead();
+    loadProject();
+    loadNotes();
+    loadReminders();
   </script>
 </body>
 </html>
