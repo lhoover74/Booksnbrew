@@ -19,7 +19,7 @@
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
             Review the lead, update status, manage project progress, add notes, set reminders,
-            schedule calls, and communicate with the client from one dashboard.
+            schedule calls, send updates, and manage invoices from one dashboard.
           </p>
         </div>
       </div>
@@ -124,6 +124,49 @@
 
             <p id="projectMsg" class="form-response" aria-live="polite"></p>
           </form>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Invoices</span>
+          <h2 class="section-title">Create and manage invoices</h2>
+
+          <form id="invoiceForm" style="margin-top:18px;">
+            <input type="hidden" id="invoiceId" name="invoiceId" />
+
+            <label for="invoiceNumber">Invoice Number</label>
+            <input id="invoiceNumber" name="invoiceNumber" type="text" placeholder="INV-1001" required />
+
+            <label for="invoiceAmount" style="margin-top:14px;">Amount</label>
+            <input id="invoiceAmount" name="amount" type="number" step="0.01" min="0.01" required />
+
+            <label for="invoiceStatus" style="margin-top:14px;">Status</label>
+            <select id="invoiceStatus" name="status" required>
+              <option>Draft</option>
+              <option>Sent</option>
+              <option>Paid</option>
+              <option>Overdue</option>
+            </select>
+
+            <label for="invoiceDueDate" style="margin-top:14px;">Due Date</label>
+            <input id="invoiceDueDate" name="dueDate" type="date" />
+
+            <label for="invoicePaymentUrl" style="margin-top:14px;">Payment Link</label>
+            <input id="invoicePaymentUrl" name="paymentUrl" type="url" placeholder="https://..." />
+
+            <label for="invoiceNotes" style="margin-top:14px;">Notes</label>
+            <textarea id="invoiceNotes" name="notes" placeholder="Deposit for website build"></textarea>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn primary">Save Invoice</button>
+            </div>
+
+            <p id="invoiceMsg" class="form-response" aria-live="polite"></p>
+          </form>
+
+          <div style="margin-top:24px;">
+            <label>Invoice History</label>
+            <div id="invoiceList" style="display:grid; gap:12px; margin-top:12px;"></div>
+          </div>
         </div>
 
         <div class="grid-2" style="margin-top:22px; align-items:start;">
@@ -404,6 +447,32 @@
       } catch (error) {}
     }
 
+    async function loadInvoices() {
+      const list = document.getElementById("invoiceList");
+
+      try {
+        const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
+        const invoices = response.invoices || [];
+
+        list.innerHTML = invoices.length
+          ? invoices.map(item => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
+                </div>
+                <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                  $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
+                </div>
+                <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
+                ${item.payment_url ? `<a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">Open Payment Link</a>` : ""}
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
+      }
+    }
+
     async function loadNotes() {
       const list = document.getElementById("notesList");
 
@@ -521,6 +590,37 @@
       }
     });
 
+    document.getElementById("invoiceForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("invoiceMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        const response = await fetch("/api/invoices/upsert", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to save invoice.";
+          return;
+        }
+
+        msg.textContent = "Invoice saved successfully.";
+        event.target.reset();
+        document.getElementById("invoiceId").value = "";
+        await loadInvoices();
+      } catch (error) {
+        msg.textContent = "Unable to save invoice right now.";
+      }
+    });
+
     document.getElementById("noteForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const msg = document.getElementById("noteMsg");
@@ -628,6 +728,7 @@
 
     loadLead();
     loadProject();
+    loadInvoices();
     loadNotes();
     loadReminders();
     loadMessages();
