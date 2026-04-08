@@ -39,10 +39,16 @@ export async function onRequest(context) {
   path.startsWith("/api/projects") ||
   path.startsWith("/api/messages") ||
   path.startsWith("/api/invoices") ||
-  path.startsWith("/api/invoices/resend")
+  path.startsWith("/api/files") ||
   path.startsWith("/api/client/create-account") ||
   path.startsWith("/api/client/send-invite") ||
   path.startsWith("/api/client/send-update");
+
+const protectClientApi =
+  path.startsWith("/api/client/me") ||
+  path.startsWith("/api/client/change-password") ||
+  path.startsWith("/api/client/reply") ||
+  path.startsWith("/api/files/upload");
 
   const protectClientPage =
     path === "/client/portal.html";
