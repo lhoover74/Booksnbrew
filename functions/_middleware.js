@@ -27,24 +27,42 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  const protectAdminPage = path.startsWith("/admin") && !path.startsWith("/admin/login");
-  const protectAdminApi = path.startsWith("/api/leads") || path.startsWith("/api/notes") || path.startsWith("/api/reminders") || path.startsWith("/api/bookings");
-  const protectClientPage = path === "/client/portal.html";
-  const protectClientApi = path.startsWith("/api/client/me");
+  const protectAdminPage =
+    path.startsWith("/admin") && !path.startsWith("/admin/login");
+
+  const protectAdminApi =
+    path.startsWith("/api/leads") ||
+    path.startsWith("/api/notes") ||
+    path.startsWith("/api/reminders") ||
+    path.startsWith("/api/bookings") ||
+    path.startsWith("/api/client/create-account") ||
+    path.startsWith("/api/client/send-invite");
+
+  const protectClientPage =
+    path === "/client/portal.html";
+
+  const protectClientApi =
+    path.startsWith("/api/client/me") ||
+    path.startsWith("/api/client/change-password");
 
   const cookies = parseCookies(request.headers.get("Cookie"));
 
   if (protectAdminPage || protectAdminApi) {
     const adminToken = cookies.bb_admin_session;
     const validAdminToken = await expectedAdminToken(env);
-    const adminAuthenticated = Boolean(adminToken && validAdminToken && adminToken === validAdminToken);
+    const adminAuthenticated = Boolean(
+      adminToken && validAdminToken && adminToken === validAdminToken
+    );
 
     if (!adminAuthenticated) {
       if (protectAdminApi) {
-        return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" }
-        });
+        return new Response(
+          JSON.stringify({ ok: false, error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json" }
+          }
+        );
       }
 
       return Response.redirect(`${url.origin}/admin/login.html`, 302);
@@ -57,10 +75,13 @@ export async function onRequest(context) {
 
     if (!clientToken || !clientLeadId) {
       if (protectClientApi) {
-        return new Response(JSON.stringify({ ok: false, error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" }
-        });
+        return new Response(
+          JSON.stringify({ ok: false, error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json" }
+          }
+        );
       }
 
       return Response.redirect(`${url.origin}/client/login.html`, 302);
