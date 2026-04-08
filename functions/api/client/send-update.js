@@ -21,17 +21,27 @@ export async function onRequestPost(context) {
     const { request, env } = context;
     const form = await request.formData();
 
+    const leadId = (form.get("leadId") || "").toString().trim();
     const email = (form.get("email") || "").toString().trim().toLowerCase();
     const name = (form.get("name") || "").toString().trim();
     const subject = (form.get("subject") || "").toString().trim();
     const message = (form.get("message") || "").toString().trim();
 
-    if (!email || !name || !subject || !message) {
+    if (!leadId || !email || !name || !subject || !message) {
       return json(
-        { ok: false, error: "Name, email, subject, and message are required." },
+        { ok: false, error: "Lead ID, name, email, subject, and message are required." },
         400
       );
     }
+
+    const createdAt = new Date().toISOString();
+
+    await env.DB.prepare(
+      `INSERT INTO project_messages (lead_id, sender_type, sender_name, subject, message, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    )
+      .bind(leadId, "admin", "Books and Brews", subject, message, createdAt)
+      .run();
 
     const html = `
       <!DOCTYPE html>
@@ -75,7 +85,7 @@ export async function onRequestPost(context) {
                 </div>
 
                 <p style="margin:0 0 18px;font-size:15px;line-height:1.9;color:#65584f;">
-                  If you have questions or want to reply with feedback, just respond to this email.
+                  You can also view your updates inside your client portal.
                 </p>
 
                 <div style="margin-top:30px;">
@@ -84,9 +94,6 @@ export async function onRequestPost(context) {
                   </p>
                   <p style="margin:4px 0 0;font-size:13px;color:#7a6c62;">
                     Smart Websites. Smooth Experience.
-                  </p>
-                  <p style="margin:10px 0 0;font-size:13px;color:#9a8b7f;">
-                    https://booksnbrew.pages.dev
                   </p>
                 </div>
               </div>
