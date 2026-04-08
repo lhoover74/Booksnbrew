@@ -19,7 +19,7 @@
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
             Review the lead, update status, manage project progress, add notes, set reminders,
-            schedule calls, and send client updates from one dashboard.
+            schedule calls, and communicate with the client from one dashboard.
           </p>
         </div>
       </div>
@@ -86,19 +86,6 @@
 
               <p id="statusMsg" class="form-response" aria-live="polite"></p>
             </form>
-
-            <div style="
-              margin-top:24px;
-              padding:18px;
-              border:1px solid var(--border);
-              border-radius:16px;
-              background:rgba(255,255,255,.02);
-            ">
-              <div class="meta" style="margin-bottom:8px;">Quick note</div>
-              <p style="margin:0;color:var(--muted);line-height:1.75;">
-                Keep statuses and project progress current so your dashboard and client portal stay accurate.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -268,6 +255,12 @@
 
             <p id="clientUpdateMsg" class="form-response" aria-live="polite"></p>
           </form>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Inbox</span>
+          <h2 class="section-title">Client messages</h2>
+          <div id="adminMessagesList" style="display:grid; gap:12px; margin-top:16px;"></div>
         </div>
       </div>
     </section>
@@ -455,6 +448,31 @@
       }
     }
 
+    async function loadMessages() {
+      const list = document.getElementById("adminMessagesList");
+
+      try {
+        const response = await fetchJson(`/api/messages/by-lead?leadId=${leadId}`);
+        const messages = response.messages || [];
+
+        list.innerHTML = messages.length
+          ? messages.map(item => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(formatDate(item.created_at))} • ${escapeHtml(item.sender_type || "message")} • ${escapeHtml(item.subject || "No subject")}
+                </div>
+                <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                  ${escapeHtml(item.sender_name || "")}
+                </div>
+                <div style="line-height:1.8;">${escapeHtml(item.message || "")}</div>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No messages yet.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load messages.</div>`;
+      }
+    }
+
     document.getElementById("statusForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const msg = document.getElementById("statusMsg");
@@ -602,6 +620,7 @@
 
         msg.textContent = "Update sent successfully.";
         event.target.reset();
+        await loadMessages();
       } catch (error) {
         msg.textContent = "Unable to send update right now.";
       }
@@ -611,6 +630,7 @@
     loadProject();
     loadNotes();
     loadReminders();
+    loadMessages();
   </script>
 </body>
 </html>
