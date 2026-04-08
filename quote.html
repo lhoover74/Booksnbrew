@@ -1,1 +1,275 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Request a Quote | Books and Brews</title><meta name="description" content="Request a custom website quote from Books and Brews. Share your business, project type, budget, and goals."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"></head><body><div class="site-shell inner-page"><header class="topbar container"><a class="brand" href="index.html"><span class="brand-mark">☕</span><span class="brand-text"><strong>BOOKS AND</strong><em>BREWS</em></span></a><nav class="desktop-nav"><a href="index.html">Home</a><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="contact.html">Contact</a></nav><a class="button button-primary hide-mobile active-cta" href="quote.html">Get a Quote</a><button class="menu-toggle">☰</button></header><nav class="mobile-nav container"><a href="index.html">Home</a><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="quote.html">Get a Quote</a><a href="contact.html">Contact</a></nav><main class="container page-main"><section class="page-hero"><p class="section-kicker">REQUEST A QUOTE</p><h1>Tell us about your project.</h1><p>Every project is custom. Submit your details and we’ll get back to you with a tailored quote.</p></section><section class="form-wrap"><form class="site-form"><div class="field-grid two-col"><label><span>Name</span><input type="text" placeholder="Your name"></label><label><span>Email</span><input type="email" placeholder="you@example.com"></label></div><div class="field-grid two-col"><label><span>Phone</span><input type="tel" placeholder="(555) 555-5555"></label><label><span>Business Name</span><input type="text" placeholder="Business name"></label></div><div class="field-grid two-col"><label><span>Project Type</span><select><option>Business Website</option><option>Landing Page</option><option>E-Commerce Website</option><option>Website Redesign</option><option>Custom Solution</option></select></label><label><span>Budget Range</span><select><option>$500 - $1,500</option><option>$1,500 - $3,000</option><option>$3,000 - $5,000</option><option>$5,000+</option></select></label></div><label><span>Project Details</span><textarea rows="8" placeholder="Tell us about your goals, the pages you need, and anything important about the project."></textarea></label><button type="submit" class="button button-primary">Submit Quote Request</button></form></section></main><footer class="footer container"><div><a class="brand footer-brand" href="index.html"><span class="brand-mark">☕</span><span class="brand-text"><strong>BOOKS AND</strong><em>BREWS</em></span></a><p>Smart, custom websites with a smooth client experience.</p></div><div class="footer-links"><a href="about.html">About</a><a href="services.html">Services</a><a href="portfolio.html">Portfolio</a><a href="quote.html">Request a Quote</a><a href="contact.html">Contact</a></div></footer></div><script src="script.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Request a Quote | Books and Brews</title>
+  <meta
+    name="description"
+    content="Request a custom quote from Books and Brews for business websites, landing pages, e-commerce builds, redesigns, and more."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar-wrap">
+      <div class="container">
+        <div class="topbar">
+          <div class="inner">
+            <a href="/" class="logo" aria-label="Books and Brews home">
+              <div class="logo-mark" aria-hidden="true">
+                <span class="logo-steam"></span>
+                <span class="logo-book"></span>
+              </div>
+              <div class="logo-text">
+                <small>BOOKS AND</small>
+                <strong>BREWS</strong>
+              </div>
+            </a>
+
+            <nav class="nav" aria-label="Main navigation">
+              <a href="/">Home</a>
+              <a href="/about.html">About</a>
+              <a href="/services.html">Services</a>
+              <a href="/portfolio.html">Portfolio</a>
+              <a href="/contact.html">Contact</a>
+            </nav>
+
+            <div class="cta-desktop">
+              <a href="/quote.html" class="cta-btn">Get a Quote</a>
+            </div>
+
+            <button class="menu-toggle" type="button" aria-label="Open menu">
+              Menu
+            </button>
+          </div>
+
+          <div class="mobile-nav" aria-label="Mobile navigation">
+            <a href="/">Home</a>
+            <a href="/about.html">About</a>
+            <a href="/services.html">Services</a>
+            <a href="/portfolio.html">Portfolio</a>
+            <a href="/contact.html">Contact</a>
+            <a href="/quote.html" class="btn primary">Get a Quote</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <div class="container">
+          <div class="section-card">
+            <span class="eyebrow">Quote request</span>
+            <h1 class="page-title">Tell us about your project.</h1>
+            <p class="page-copy">
+              Every project is custom. Submit your details and we’ll get back to you
+              with a tailored quote based on your goals, scope, and timeline.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section compact">
+        <div class="container">
+          <div class="grid-2">
+            <div class="section-card">
+              <span class="eyebrow">Project form</span>
+              <h2 class="section-title">Request a custom quote</h2>
+              <p class="section-copy">
+                The more detail you give, the better we can recommend the right setup,
+                timeline, and price range for your business.
+              </p>
+
+              <form
+                action="/api/contact"
+                method="POST"
+                class="form-grid"
+                id="quoteForm"
+              >
+                <input type="hidden" name="formType" value="quote" />
+
+                <div>
+                  <label for="quote-name">Name</label>
+                  <input
+                    id="quote-name"
+                    name="name"
+                    type="text"
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label for="quote-email">Email</label>
+                  <input
+                    id="quote-email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label for="quote-phone">Phone</label>
+                  <input
+                    id="quote-phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="Optional"
+                  />
+                </div>
+
+                <div>
+                  <label for="quote-business">Business Name</label>
+                  <input
+                    id="quote-business"
+                    name="businessName"
+                    type="text"
+                    placeholder="Your business name"
+                  />
+                </div>
+
+                <div>
+                  <label for="quote-project-type">Project Type</label>
+                  <select id="quote-project-type" name="projectType">
+                    <option value="">Select one</option>
+                    <option>Business Website</option>
+                    <option>Landing Page</option>
+                    <option>E-Commerce Website</option>
+                    <option>Website Redesign</option>
+                    <option>Website Maintenance</option>
+                    <option>Custom Solution</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="quote-budget">Budget Range</label>
+                  <select id="quote-budget" name="budgetRange">
+                    <option value="">Select one</option>
+                    <option>$500 - $1,000</option>
+                    <option>$1,000 - $2,500</option>
+                    <option>$2,500 - $5,000</option>
+                    <option>$5,000+</option>
+                  </select>
+                </div>
+
+                <div class="full">
+                  <label for="quote-details">Project Details</label>
+                  <textarea
+                    id="quote-details"
+                    name="projectDetails"
+                    placeholder="Tell us about your business, what kind of website you need, any features you want, your timeline, and anything else that would help."
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="full">
+                  <button type="submit" class="btn primary">Request a Quote</button>
+                  <p class="form-response" aria-live="polite"></p>
+                </div>
+              </form>
+            </div>
+
+            <div class="section-card">
+              <span class="eyebrow">What happens next</span>
+              <h2 class="section-title">Simple process. Clear communication.</h2>
+              <p class="section-copy">
+                Books and Brews keeps the process smooth, organized, and easy to
+                understand. No confusing tech talk. Just a clean plan to help your
+                business move forward.
+              </p>
+
+              <div style="display:grid; gap:18px; margin-top:28px;">
+                <div class="contact-detail">
+                  <div class="icon-badge">1</div>
+                  <div>
+                    <strong>We review your request</strong>
+                    <span>
+                      We look over your goals, scope, and the kind of site that makes
+                      the most sense for your business.
+                    </span>
+                  </div>
+                </div>
+
+                <div class="contact-detail">
+                  <div class="icon-badge">2</div>
+                  <div>
+                    <strong>You get a tailored response</strong>
+                    <span>
+                      We reply with next steps, project fit, and pricing direction
+                      based on the details you submitted.
+                    </span>
+                  </div>
+                </div>
+
+                <div class="contact-detail">
+                  <div class="icon-badge">3</div>
+                  <div>
+                    <strong>We build with purpose</strong>
+                    <span>
+                      Once approved, we move into planning, design, and development
+                      with business results in mind.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:30px;">
+                <a href="/contact.html" class="btn secondary">Have a simple question?</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-band">
+        <div class="container">
+          <div class="cta-panel">
+            <span class="eyebrow">Built for growth</span>
+            <h2 class="section-title">Professional websites without the messy process.</h2>
+            <p class="section-copy" style="margin:0 auto 24px;">
+              Clean design, strong messaging, mobile-first structure, and a smooth
+              client experience from first contact to launch.
+            </p>
+            <a href="/portfolio.html" class="btn secondary">View Portfolio</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="section-card">
+          <div class="footer-grid">
+            <div>
+              <strong class="serif" style="font-size:1.3rem;">Books and Brews</strong>
+              <p style="margin:8px 0 0; color:var(--muted);">
+                Smart websites. Smooth experience.
+              </p>
+            </div>
+
+            <div class="small-links">
+              <a href="/">Home</a>
+              <a href="/about.html">About</a>
+              <a href="/services.html">Services</a>
+              <a href="/portfolio.html">Portfolio</a>
+              <a href="/quote.html">Quote</a>
+              <a href="/contact.html">Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
