@@ -25,10 +25,32 @@ export async function onRequestPost(context) {
       budgetRange &&
       (budgetRange.includes("$5,000") || budgetRange.includes("5000"));
 
-    const submittedAt = new Date().toLocaleString("en-US", {
+    const priority = isHighValue ? "High" : "Normal";
+    const submittedAt = new Date().toISOString();
+    const displaySubmittedAt = new Date(submittedAt).toLocaleString("en-US", {
       dateStyle: "medium",
       timeStyle: "short"
     });
+    const sourcePage = getSourcePage(request, formType);
+
+    let leadId = null;
+
+    if (env.DB) {
+      leadId = await saveLead(env.DB, {
+        formType,
+        name,
+        email,
+        phone,
+        businessName,
+        projectType,
+        budgetRange,
+        message,
+        projectDetails,
+        sourcePage,
+        priority,
+        submittedAt
+      });
+    }
 
     const subject = isQuote
       ? `🔥 New Website Quote Request (${budgetRange || "No Budget"}) - ${name}`
@@ -40,6 +62,7 @@ export async function onRequestPost(context) {
 
     const adminHtml = isQuote
       ? getAdminQuoteEmail({
+          leadId,
           name,
           email,
           phone,
@@ -47,15 +70,20 @@ export async function onRequestPost(context) {
           projectType,
           budgetRange,
           projectDetails,
-          submittedAt,
-          isHighValue
+          submittedAt: displaySubmittedAt,
+          isHighValue,
+          sourcePage,
+          priority
         })
       : getAdminContactEmail({
+          leadId,
           name,
           email,
           phone,
           message,
-          submittedAt
+          submittedAt: displaySubmittedAt,
+          sourcePage,
+          priority
         });
 
     const autoReplyHtml = isQuote
@@ -133,6 +161,60 @@ export async function onRequestPost(context) {
   }
 }
 
+async function saveLead(DB, lead) {
+  const result = await DB.prepare(`
+    INSERT INTO leads (
+      form_type,
+      name,
+      email,
+      phone,
+      business_name,
+      project_type,
+      budget_range,
+      message,
+      project_details,
+      source_page,
+      status,
+      priority,
+      submitted_at,
+      updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'New', ?, ?, ?)
+  `)
+    .bind(
+      lead.formType,
+      lead.name,
+      lead.email,
+      lead.phone || null,
+      lead.businessName || null,
+      lead.projectType || null,
+      lead.budgetRange || null,
+      lead.message || null,
+      lead.projectDetails || null,
+      lead.sourcePage,
+      lead.priority,
+      lead.submittedAt,
+      lead.submittedAt
+    )
+    .run();
+
+  return result.meta?.last_row_id || null;
+}
+
+function getSourcePage(request, formType) {
+  const referer = request.headers.get("referer");
+
+  if (!referer) {
+    return formType === "quote" ? "/quote.html" : "/contact.html";
+  }
+
+  try {
+    const url = new URL(referer);
+    return url.pathname || (formType === "quote" ? "/quote.html" : "/contact.html");
+  } catch {
+    return formType === "quote" ? "/quote.html" : "/contact.html";
+  }
+}
+
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -142,7 +224,16 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-function getAdminContactEmail({ name, email, phone, message, submittedAt }) {
+function getAdminContactEmail({
+  leadId,
+  name,
+  email,
+  phone,
+  message,
+  submittedAt,
+  sourcePage,
+  priority
+}) {
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -172,9 +263,12 @@ function getAdminContactEmail({ name, email, phone, message, submittedAt }) {
           </div>
 
           <div style="padding:28px;">
+            ${leadId ? infoRow("Lead ID", String(leadId)) : ""}
+            ${infoRow("Priority", priority)}
             ${infoRow("Name", name)}
             ${infoRow("Email", email)}
             ${infoRow("Phone", phone || "Not provided")}
+            ${infoRow("Source Page", sourcePage)}
             ${infoRow("Submitted", submittedAt)}
 
             <div style="margin-top:20px;padding:18px;background:#121111;border:1px solid #2a211d;border-radius:14px;">
@@ -199,6 +293,7 @@ function getAdminContactEmail({ name, email, phone, message, submittedAt }) {
 }
 
 function getAdminQuoteEmail({
+  leadId,
   name,
   email,
   phone,
@@ -207,7 +302,9 @@ function getAdminQuoteEmail({
   budgetRange,
   projectDetails,
   submittedAt,
-  isHighValue
+  isHighValue,
+  sourcePage,
+  priority
 }) {
   return `
   <!DOCTYPE html>
@@ -247,12 +344,15 @@ function getAdminQuoteEmail({
           </div>
 
           <div style="padding:28px;">
+            ${leadId ? infoRow("Lead ID", String(leadId)) : ""}
+            ${infoRow("Priority", priority)}
             ${infoRow("Name", name)}
             ${infoRow("Email", email)}
             ${infoRow("Phone", phone || "Not provided")}
             ${infoRow("Business Name", businessName || "Not provided")}
             ${infoRow("Project Type", projectType || "Not selected")}
             ${infoRow("Budget Range", budgetRange || "Not selected")}
+            ${infoRow("Source Page", sourcePage)}
             ${infoRow("Submitted", submittedAt)}
 
             <div style="margin-top:20px;padding:18px;background:#121111;border:1px solid #2a211d;border-radius:14px;">
