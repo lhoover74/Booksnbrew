@@ -582,6 +582,7 @@
         const name = document.getElementById("leadName").textContent.trim();
 
         const form = new FormData();
+        form.append("leadId", leadId);
         form.append("email", email);
         form.append("name", name);
         form.append("subject", subject);
