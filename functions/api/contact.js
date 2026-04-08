@@ -48,20 +48,44 @@ export async function onRequestPost(context) {
         <p><strong>Message:</strong><br>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
       `;
 
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
-        to: ["michael@govdirect.org"],
-        subject,
-        html,
-        replyTo: email
-      })
-    });
+    const html = isQuote
+  ? `
+  <div style="background:#0b0b0c;padding:30px;font-family:Arial,sans-serif;color:#f5ede3;">
+    <div style="max-width:600px;margin:auto;background:#151515;border-radius:12px;padding:24px;">
+      
+      <h2 style="color:#c79058;margin-bottom:10px;">New Quote Request</h2>
+      <p style="color:#d6c6b8;margin-bottom:20px;">You have received a new project inquiry.</p>
+
+      <div style="line-height:1.8;">
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+        <p><strong>Business:</strong> ${escapeHtml(businessName)}</p>
+        <p><strong>Project Type:</strong> ${escapeHtml(projectType)}</p>
+        <p><strong>Budget:</strong> ${escapeHtml(budgetRange)}</p>
+        <p><strong>Details:</strong><br>${escapeHtml(projectDetails).replace(/\n/g, "<br>")}</p>
+      </div>
+
+    </div>
+  </div>
+  `
+  : `
+  <div style="background:#0b0b0c;padding:30px;font-family:Arial,sans-serif;color:#f5ede3;">
+    <div style="max-width:600px;margin:auto;background:#151515;border-radius:12px;padding:24px;">
+      
+      <h2 style="color:#c79058;margin-bottom:10px;">New Contact Inquiry</h2>
+      <p style="color:#d6c6b8;margin-bottom:20px;">You have received a new message.</p>
+
+      <div style="line-height:1.8;">
+        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+        <p><strong>Message:</strong><br>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
+      </div>
+
+    </div>
+  </div>
+  `;
 
     const resendData = await resendResponse.json();
 
