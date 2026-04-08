@@ -24,7 +24,42 @@
         </div>
       </div>
     </section>
+<div class="section-card" style="margin-top:22px;">
+  <span class="eyebrow">Project tracker</span>
+  <h2 class="section-title">Manage project progress</h2>
 
+  <form id="projectForm" style="margin-top:18px;">
+    <label for="projectTitle">Project Title</label>
+    <input id="projectTitle" name="title" type="text" placeholder="Website Build" required />
+
+    <label for="projectStage" style="margin-top:14px;">Stage</label>
+    <select id="projectStage" name="stage" required>
+      <option>Inquiry Received</option>
+      <option>Strategy</option>
+      <option>Design</option>
+      <option>Development</option>
+      <option>Review</option>
+      <option>Revisions</option>
+      <option>Launch</option>
+      <option>Complete</option>
+    </select>
+
+    <label for="projectProgress" style="margin-top:14px;">Progress %</label>
+    <input id="projectProgress" name="progress" type="number" min="0" max="100" required />
+
+    <label for="projectTargetDate" style="margin-top:14px;">Target Date</label>
+    <input id="projectTargetDate" name="targetDate" type="date" />
+
+    <label for="projectMilestone" style="margin-top:14px;">Next Milestone</label>
+    <input id="projectMilestone" name="nextMilestone" type="text" placeholder="Homepage design review" />
+
+    <div style="margin-top:18px;">
+      <button type="submit" class="btn primary">Save Project Tracker</button>
+    </div>
+
+    <p id="projectMsg" class="form-response" aria-live="polite"></p>
+  </form>
+</div>
     <section class="section compact" style="padding-top:10px;">
       <div class="container">
         <div id="errorBox" class="section-card" style="display:none; margin-bottom:22px; border-color:rgba(190,80,80,.3);">
