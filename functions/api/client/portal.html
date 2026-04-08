@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Client Portal</title>
+</head>
+<body style="background:#0b0b0c;color:white;font-family:sans-serif;">
+<h1>Your Project</h1>
+
+<div id="project"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const email = params.get("email");
+
+async function load(){
+  const res = await fetch('/api/leads');
+  const data = await res.json();
+  const lead = data.leads.find(l => l.email === email);
+
+  if(!lead){
+    document.getElementById("project").innerHTML = "No project found";
+    return;
+  }
+
+  document.getElementById("project").innerHTML = `
+    <h2>${lead.name}</h2>
+    <p>Status: ${lead.status}</p>
+    <p>Project: ${lead.project_type}</p>
+    <p>Budget: ${lead.budget_range}</p>
+  `;
+}
+
+load();
+</script>
+</body>
+</html>
