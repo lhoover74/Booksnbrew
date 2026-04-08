@@ -484,32 +484,32 @@
     }
 
     async function generateStripeCheckout(invoiceId) {
-      try {
-        const form = new FormData();
-        form.append("invoiceId", invoiceId);
+  try {
+    const form = new FormData();
+    form.append("invoiceId", invoiceId);
 
-        const response = await fetch("/api/stripe/create-checkout-session", {
-          method: "POST",
-          body: form
-        });
+    const response = await fetch("/api/stripe/create-checkout-session", {
+      method: "POST",
+      body: form
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (!response.ok || !data.ok) {
-          alert(
-            typeof data.error === "string"
-              ? data.error
-              : data.error?.message || "Unable to generate Stripe payment link."
-          );
-          return;
-        }
-
-        await loadInvoices();
-        alert("Stripe payment link generated successfully.");
-      } catch (error) {
-        alert("Unable to generate Stripe payment link right now.");
-      }
+    if (!response.ok || !data.ok) {
+      alert(
+        typeof data.error === "string"
+          ? data.error
+          : data.error?.message || data.warning || "Unable to generate Stripe payment link."
+      );
+      return;
     }
+
+    await loadInvoices();
+    alert("Stripe payment link generated and emailed successfully.");
+  } catch (error) {
+    alert("Unable to generate Stripe payment link right now.");
+  }
+}
 
     async function loadNotes() {
       const list = document.getElementById("notesList");
