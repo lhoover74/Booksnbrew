@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pipeline</title>
+</head>
+<body style="background:#0b0b0c;color:white;font-family:sans-serif;">
+  <h1>Pipeline</h1>
+  <div id="pipeline" style="display:flex;gap:20px;"></div>
+
+<script>
+async function loadPipeline(){
+  const res = await fetch('/api/leads');
+  const data = await res.json();
+  const leads = data.leads || [];
+
+  const stages = ["New","Contacted","Qualified","Proposal Sent","Won","Lost"];
+
+  document.getElementById("pipeline").innerHTML = stages.map(stage=>{
+    const items = leads.filter(l=>l.status===stage);
+
+    return `
+      <div style="width:250px;background:#111;padding:10px;border-radius:10px;">
+        <h3>${stage}</h3>
+        ${items.map(l=>`
+          <div style="background:#222;margin:10px;padding:10px;border-radius:8px;">
+            ${l.name}<br>
+            ${autoTag(l)}<br>
+            <a href="/admin/manage.html?id=${l.id}">Manage</a>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }).join("");
+}
+
+function autoTag(lead){
+  if(lead.budget_range?.includes("5000")) return "🔥 High Value";
+  if(lead.project_type) return "📌 " + lead.project_type;
+  return "General";
+}
+
+loadPipeline();
+</script>
+</body>
+</html>
