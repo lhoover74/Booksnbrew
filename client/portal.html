@@ -153,9 +153,19 @@
         const project = data.project || null;
         const notes = data.notes || [];
         const reminders = data.reminders || [];
-
+        const messages = data.messages || [];
         document.getElementById("portalName").textContent = lead.name || "Client";
-
+        document.getElementById("portalMessages").innerHTML =
+  messages.length
+    ? messages.map(item => `
+        <div class="contact-detail" style="display:block;">
+          <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+            ${escapeHtml(formatDate(item.created_at))} • ${escapeHtml(item.subject || "Update")}
+          </div>
+          <div style="line-height:1.8;">${escapeHtml(item.message || "")}</div>
+        </div>
+      `).join("")
+    : `<div class="contact-detail" style="display:block;">No project updates yet.</div>`;
         document.getElementById("portalMeta").innerHTML = [
           block("Email", lead.email || "—"),
           block("Status", lead.status || "New"),
