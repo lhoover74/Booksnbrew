@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Lead</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Manage Lead</h1>
+
+    <div id="lead-info"></div>
+
+    <h3>Update Status</h3>
+    <form id="statusForm">
+      <select name="status">
+        <option>New</option>
+        <option>Contacted</option>
+        <option>Qualified</option>
+        <option>Proposal Sent</option>
+        <option>Won</option>
+        <option>Lost</option>
+      </select>
+      <button type="submit">Update</button>
+    </form>
+
+    <h3>Add Note</h3>
+    <form id="noteForm">
+      <textarea name="note" placeholder="Write note..."></textarea>
+      <button type="submit">Add Note</button>
+    </form>
+
+    <h3>Notes</h3>
+    <div id="notes"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    async function loadLead() {
+      const res = await fetch(`/api/leads/${id}`);
+      const data = await res.json();
+      const lead = data.lead;
+      document.getElementById('lead-info').innerHTML = `
+        <p><strong>${lead.name}</strong> (${lead.email})</p>
+      `;
+    }
+
+    async function loadNotes() {
+      const res = await fetch(`/api/get-notes?leadId=${id}`);
+      const data = await res.json();
+      document.getElementById('notes').innerHTML = data.notes.map(n => `<p>${n.note}</p>`).join('');
+    }
+
+    document.getElementById('statusForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      form.append('id', id);
+      await fetch('/api/leads/update-status', { method: 'POST', body: form });
+      alert('Status updated');
+    });
+
+    document.getElementById('noteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      form.append('leadId', id);
+      await fetch('/api/notes/add', { method: 'POST', body: form });
+      loadNotes();
+    });
+
+    loadLead();
+    loadNotes();
+  </script>
+</body>
+</html>
