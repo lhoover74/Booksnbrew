@@ -2,182 +2,484 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Lead | Books and Brews</title>
   <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
+<body>
+  <div class="site-shell">
+    <section class="page-hero" style="padding-bottom:20px;">
+      <div class="container">
+        <div class="section-card" style="
+          background:
+            radial-gradient(circle at top right, rgba(199,144,88,.14), transparent 30%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+        ">
+          <span class="eyebrow">Admin CRM</span>
+          <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
+          <p class="page-copy" style="max-width:760px;">
+            Review the lead, update their pipeline status, add internal notes, set reminders,
+            and schedule a follow-up call from one clean dashboard.
+          </p>
+        </div>
+      </div>
+    </section>
 
-<body style="background:#0b0b0c;color:#f5ede3;font-family:Inter,Arial,sans-serif;">
-  <div class="container" style="max-width:1100px;margin:40px auto;">
+    <section class="section compact" style="padding-top:10px;">
+      <div class="container">
+        <div id="errorBox" class="section-card" style="display:none; margin-bottom:22px; border-color:rgba(190,80,80,.3);">
+          <p id="errorText" style="margin:0;color:#f2c4c4;"></p>
+        </div>
 
-    <h1 style="margin-bottom:20px;">Manage Lead</h1>
+        <div class="grid-2" style="align-items:start;">
+          <!-- Lead summary -->
+          <div class="section-card" style="
+            background:
+              radial-gradient(circle at top right, rgba(199,144,88,.12), transparent 35%),
+              linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+          ">
+            <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <span class="eyebrow">Lead overview</span>
+                <h2 id="leadName" class="section-title" style="margin-bottom:8px;">Loading...</h2>
+                <p id="leadEmail" style="margin:0;color:var(--muted);"></p>
+              </div>
+              <div id="leadTag" style="
+                padding:8px 12px;
+                border-radius:999px;
+                border:1px solid rgba(199,144,88,.28);
+                color:var(--accent);
+                background:rgba(199,144,88,.08);
+                font-size:.82rem;
+                font-weight:700;
+                letter-spacing:.03em;
+                white-space:nowrap;
+              ">Loading</div>
+            </div>
 
-    <div id="error" style="display:none;color:red;"></div>
+            <div id="leadMeta" style="margin-top:22px; display:grid; gap:14px;"></div>
 
-    <!-- LEAD HEADER -->
-    <div style="background:#121111;padding:20px;border-radius:14px;margin-bottom:20px;">
-      <h2 id="leadName"></h2>
-      <p id="leadEmail"></p>
-      <p id="leadTag" style="color:#c79058;font-weight:600;"></p>
-    </div>
+            <div style="margin-top:24px; display:flex; gap:12px; flex-wrap:wrap;">
+              <a id="leadEmailBtn" href="#" class="btn primary">Email Lead</a>
+              <a href="/admin/leads.html" class="btn secondary">Back to Leads</a>
+            </div>
+          </div>
 
-    <!-- STATUS -->
-    <div style="background:#121111;padding:20px;border-radius:14px;margin-bottom:20px;">
-      <h3>Status</h3>
-      <form id="statusForm">
-        <select name="status" id="statusSelect">
-          <option>New</option>
-          <option>Contacted</option>
-          <option>Qualified</option>
-          <option>Proposal Sent</option>
-          <option>Won</option>
-          <option>Lost</option>
-        </select>
-        <button type="submit">Update</button>
-      </form>
-      <p id="statusMsg"></p>
-    </div>
+          <!-- Status / quick actions -->
+          <div class="section-card">
+            <span class="eyebrow">Pipeline actions</span>
+            <h2 class="section-title">Update this lead</h2>
 
-    <!-- NOTES -->
-    <div style="background:#121111;padding:20px;border-radius:14px;margin-bottom:20px;">
-      <h3>Notes</h3>
+            <form id="statusForm" style="margin-top:18px;">
+              <label for="statusSelect">Lead Status</label>
+              <select id="statusSelect" name="status" required>
+                <option>New</option>
+                <option>Contacted</option>
+                <option>Qualified</option>
+                <option>Proposal Sent</option>
+                <option>Won</option>
+                <option>Lost</option>
+              </select>
 
-      <form id="noteForm">
-        <textarea name="note" placeholder="Add note..." required></textarea>
-        <button type="submit">Add Note</button>
-      </form>
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Save Status</button>
+              </div>
 
-      <div id="notes" style="margin-top:15px;"></div>
-    </div>
+              <p id="statusMsg" class="form-response" aria-live="polite"></p>
+            </form>
 
-    <!-- REMINDERS -->
-    <div style="background:#121111;padding:20px;border-radius:14px;margin-bottom:20px;">
-      <h3>Reminders</h3>
+            <div style="
+              margin-top:24px;
+              padding:18px;
+              border:1px solid var(--border);
+              border-radius:16px;
+              background:rgba(255,255,255,.02);
+            ">
+              <div class="meta" style="margin-bottom:8px;">Quick note</div>
+              <p style="margin:0;color:var(--muted);line-height:1.75;">
+                Keep lead statuses current so your dashboard, pipeline, and follow-ups stay organized.
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <form id="reminderForm">
-        <input type="datetime-local" name="remindAt" required />
-        <input type="text" name="note" placeholder="Reminder note" />
-        <button type="submit">Set Reminder</button>
-      </form>
+        <div class="grid-2" style="margin-top:22px; align-items:start;">
+          <!-- Inquiry details -->
+          <div class="section-card">
+            <span class="eyebrow">Lead details</span>
+            <h2 class="section-title">Project information</h2>
 
-      <div id="reminders" style="margin-top:15px;"></div>
-    </div>
+            <div id="leadDetails" style="display:grid; gap:14px; margin-top:18px;"></div>
 
-    <!-- BOOKINGS -->
-    <div style="background:#121111;padding:20px;border-radius:14px;">
-      <h3>Schedule Call</h3>
+            <div style="margin-top:22px;">
+              <label>Message</label>
+              <div id="leadMessage" class="contact-detail" style="display:block; min-height:90px;"></div>
+            </div>
 
-      <form id="bookingForm">
-        <input name="name" placeholder="Name" required />
-        <input name="email" placeholder="Email" required />
-        <input type="datetime-local" name="date" required />
-        <input name="notes" placeholder="Optional notes" />
-        <button type="submit">Schedule</button>
-      </form>
+            <div style="margin-top:18px;">
+              <label>Project Details</label>
+              <div id="leadProjectDetails" class="contact-detail" style="display:block; min-height:90px;"></div>
+            </div>
+          </div>
 
-      <p id="bookingMsg"></p>
-    </div>
+          <!-- Notes -->
+          <div class="section-card">
+            <span class="eyebrow">Internal notes</span>
+            <h2 class="section-title">Track conversations</h2>
 
+            <form id="noteForm" style="margin-top:18px;">
+              <label for="noteInput">Add Note</label>
+              <textarea
+                id="noteInput"
+                name="note"
+                placeholder="Write an internal note about this lead..."
+                required
+              ></textarea>
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Add Note</button>
+              </div>
+
+              <p id="noteMsg" class="form-response" aria-live="polite"></p>
+            </form>
+
+            <div style="margin-top:24px;">
+              <label>Notes History</label>
+              <div id="notesList" style="display:grid; gap:12px; margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:22px; align-items:start;">
+          <!-- Reminders -->
+          <div class="section-card">
+            <span class="eyebrow">Follow-up system</span>
+            <h2 class="section-title">Set reminders</h2>
+
+            <form id="reminderForm" style="margin-top:18px;">
+              <label for="remindAt">Reminder Date & Time</label>
+              <input id="remindAt" name="remindAt" type="datetime-local" required />
+
+              <label for="reminderNote" style="margin-top:14px;">Reminder Note</label>
+              <input
+                id="reminderNote"
+                name="note"
+                type="text"
+                placeholder="Optional reminder note"
+              />
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Set Reminder</button>
+              </div>
+
+              <p id="reminderMsg" class="form-response" aria-live="polite"></p>
+            </form>
+
+            <div style="margin-top:24px;">
+              <label>Upcoming Reminders</label>
+              <div id="remindersList" style="display:grid; gap:12px; margin-top:12px;"></div>
+            </div>
+          </div>
+
+          <!-- Booking -->
+          <div class="section-card">
+            <span class="eyebrow">Booking</span>
+            <h2 class="section-title">Schedule a call</h2>
+
+            <form id="bookingForm" style="margin-top:18px;">
+              <label for="bookingName">Name</label>
+              <input id="bookingName" name="name" placeholder="Lead name" required />
+
+              <label for="bookingEmail" style="margin-top:14px;">Email</label>
+              <input id="bookingEmail" name="email" type="email" placeholder="Lead email" required />
+
+              <label for="bookingDate" style="margin-top:14px;">Date & Time</label>
+              <input id="bookingDate" name="date" type="datetime-local" required />
+
+              <label for="bookingNotes" style="margin-top:14px;">Call Notes</label>
+              <input id="bookingNotes" name="notes" placeholder="Optional notes for the booking" />
+
+              <div style="margin-top:16px;">
+                <button type="submit" class="btn primary">Schedule Call</button>
+              </div>
+
+              <p id="bookingMsg" class="form-response" aria-live="polite"></p>
+            </form>
+
+            <div style="
+              margin-top:24px;
+              padding:18px;
+              border:1px solid var(--border);
+              border-radius:16px;
+              background:rgba(255,255,255,.02);
+            ">
+              <div class="meta" style="margin-bottom:8px;">Use case</div>
+              <p style="margin:0;color:var(--muted);line-height:1.75;">
+                Book discovery calls, quote reviews, or project planning sessions directly from this lead record.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-<script>
-const params = new URLSearchParams(window.location.search);
-const leadId = params.get("id");
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const leadId = params.get("id");
 
-function escapeHtml(str){
-  return String(str || "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
-function autoTag(lead){
-  if(lead.budget_range?.includes("5000")) return "🔥 High Value";
-  if(lead.project_type) return "📌 " + lead.project_type;
-  return "General";
-}
+    function formatDate(value) {
+      if (!value) return "—";
+      try {
+        return new Date(value).toLocaleString();
+      } catch {
+        return value;
+      }
+    }
 
-async function loadLead(){
-  try{
-    const res = await fetch(`/api/leads/${leadId}`);
-    const data = await res.json();
-    const lead = data.lead;
+    function autoTag(lead) {
+      if (lead?.budget_range && lead.budget_range.includes("5000")) return "🔥 High Value";
+      if (lead?.budget_range && lead.budget_range.includes("$5,000")) return "🔥 High Value";
+      if (lead?.project_type) return `📌 ${lead.project_type}`;
+      if (lead?.form_type === "quote") return "📄 Quote Lead";
+      return "General";
+    }
 
-    document.getElementById("leadName").textContent = lead.name;
-    document.getElementById("leadEmail").textContent = lead.email;
-    document.getElementById("leadTag").textContent = autoTag(lead);
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
 
-    document.getElementById("statusSelect").value = lead.status || "New";
+      const contentType = response.headers.get("content-type") || "";
+      const isJson = contentType.includes("application/json");
+      const data = isJson ? await response.json() : null;
 
-  }catch(e){
-    document.getElementById("error").textContent = "Failed to load lead";
-    document.getElementById("error").style.display = "block";
-  }
-}
+      if (!response.ok) {
+        throw new Error(data?.error || `Request failed with status ${response.status}`);
+      }
 
-async function loadNotes(){
-  const res = await fetch(`/api/get-notes?leadId=${leadId}`);
-  const data = await res.json();
+      return data;
+    }
 
-  document.getElementById("notes").innerHTML =
-    (data.notes || []).map(n =>
-      `<p>${escapeHtml(n.note)}</p>`
-    ).join("") || "No notes";
-}
+    function metaRow(label, value) {
+      return `
+        <div style="
+          padding:14px 16px;
+          border:1px solid var(--border);
+          border-radius:14px;
+          background:rgba(255,255,255,.02);
+        ">
+          <div class="meta" style="margin-bottom:6px;">${escapeHtml(label)}</div>
+          <div>${escapeHtml(value)}</div>
+        </div>
+      `;
+    }
 
-async function loadReminders(){
-  const res = await fetch(`/api/reminders-get?leadId=${leadId}`);
-  const data = await res.json();
+    function showError(message) {
+      const box = document.getElementById("errorBox");
+      const text = document.getElementById("errorText");
+      text.textContent = message;
+      box.style.display = "block";
+    }
 
-  document.getElementById("reminders").innerHTML =
-    (data.reminders || []).map(r =>
-      `<p>${new Date(r.remind_at).toLocaleString()} - ${escapeHtml(r.note)}</p>`
-    ).join("") || "No reminders";
-}
+    async function loadLead() {
+      if (!leadId) {
+        showError("Missing lead ID.");
+        return;
+      }
 
-document.getElementById("statusForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-  const form = new FormData(e.target);
-  form.append("id", leadId);
+      try {
+        const data = await fetchJson(`/api/leads/${leadId}`);
+        const lead = data.lead;
 
-  await fetch("/api/leads/update-status", {method:"POST", body:form});
-  document.getElementById("statusMsg").textContent = "Updated";
-});
+        if (!lead) {
+          showError("Lead not found.");
+          return;
+        }
 
-document.getElementById("noteForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-  const form = new FormData(e.target);
-  form.append("leadId", leadId);
+        document.getElementById("leadName").textContent = lead.name || "Lead";
+        document.getElementById("leadEmail").textContent = lead.email || "";
+        document.getElementById("leadTag").textContent = autoTag(lead);
 
-  await fetch("/api/notes/add", {method:"POST", body:form});
-  e.target.reset();
-  loadNotes();
-});
+        document.getElementById("leadMeta").innerHTML = [
+          metaRow("Email", lead.email || "—"),
+          metaRow("Phone", lead.phone || "Not provided"),
+          metaRow("Form Type", lead.form_type || "—"),
+          metaRow("Status", lead.status || "New"),
+          metaRow("Priority", lead.priority || "Normal"),
+          metaRow("Submitted", formatDate(lead.submitted_at)),
+          metaRow("Source Page", lead.source_page || "—")
+        ].join("");
 
-document.getElementById("reminderForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-  const form = new FormData(e.target);
-  form.append("leadId", leadId);
+        document.getElementById("leadDetails").innerHTML = [
+          metaRow("Business Name", lead.business_name || "Not provided"),
+          metaRow("Project Type", lead.project_type || "Not provided"),
+          metaRow("Budget Range", lead.budget_range || "Not provided")
+        ].join("");
 
-  await fetch("/api/reminders-add", {method:"POST", body:form});
-  e.target.reset();
-  loadReminders();
-});
+        document.getElementById("leadMessage").innerHTML =
+          escapeHtml(lead.message || "—").replace(/\n/g, "<br>");
 
-document.getElementById("bookingForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-  const form = new FormData(e.target);
-  form.append("leadId", leadId);
+        document.getElementById("leadProjectDetails").innerHTML =
+          escapeHtml(lead.project_details || "—").replace(/\n/g, "<br>");
 
-  await fetch("/api/bookings-add", {method:"POST", body:form});
-  document.getElementById("bookingMsg").textContent = "Call scheduled";
-  e.target.reset();
-});
+        document.getElementById("leadEmailBtn").href = `mailto:${lead.email || ""}`;
 
-loadLead();
-loadNotes();
-loadReminders();
-</script>
+        document.getElementById("statusSelect").value = lead.status || "New";
+        document.getElementById("bookingName").value = lead.name || "";
+        document.getElementById("bookingEmail").value = lead.email || "";
+      } catch (error) {
+        showError(error.message || "Unable to load lead.");
+      }
+    }
 
+    async function loadNotes() {
+      const list = document.getElementById("notesList");
+
+      try {
+        const response = await fetchJson(`/api/get-notes?leadId=${leadId}`);
+        const notes = response.notes || [];
+
+        list.innerHTML = notes.length
+          ? notes.map(note => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(formatDate(note.created_at))}
+                </div>
+                <div style="line-height:1.8;">${escapeHtml(note.note || "")}</div>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No notes yet.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load notes.</div>`;
+      }
+    }
+
+    async function loadReminders() {
+      const list = document.getElementById("remindersList");
+
+      try {
+        const response = await fetchJson(`/api/reminders-get?leadId=${leadId}`);
+        const reminders = response.reminders || [];
+
+        list.innerHTML = reminders.length
+          ? reminders.map(reminder => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(formatDate(reminder.remind_at))}
+                </div>
+                <div style="line-height:1.8;">${escapeHtml(reminder.note || "No note")}</div>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No reminders set.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load reminders.</div>`;
+      }
+    }
+
+    document.getElementById("statusForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("statusMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("id", leadId);
+
+        await fetchJson("/api/leads/update-status", {
+          method: "POST",
+          body: form
+        });
+
+        msg.textContent = "Status updated successfully.";
+        await loadLead();
+      } catch (error) {
+        msg.textContent = error.message || "Unable to update status.";
+      }
+    });
+
+    document.getElementById("noteForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("noteMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        await fetchJson("/api/notes/add", {
+          method: "POST",
+          body: form
+        });
+
+        event.target.reset();
+        msg.textContent = "Note added successfully.";
+        await loadNotes();
+      } catch (error) {
+        msg.textContent = error.message || "Unable to add note.";
+      }
+    });
+
+    document.getElementById("reminderForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("reminderMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        await fetchJson("/api/reminders-add", {
+          method: "POST",
+          body: form
+        });
+
+        event.target.reset();
+        msg.textContent = "Reminder set successfully.";
+        await loadReminders();
+      } catch (error) {
+        msg.textContent = error.message || "Unable to set reminder.";
+      }
+    });
+
+    document.getElementById("bookingForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const msg = document.getElementById("bookingMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        await fetchJson("/api/bookings-add", {
+          method: "POST",
+          body: form
+        });
+
+        msg.textContent = "Call scheduled successfully.";
+        document.getElementById("bookingDate").value = "";
+        document.getElementById("bookingNotes").value = "";
+      } catch (error) {
+        msg.textContent = error.message || "Unable to schedule call.";
+      }
+    });
+
+    loadLead();
+    loadNotes();
+    loadReminders();
+  </script>
 </body>
 </html>
