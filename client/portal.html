@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Project | Books and Brews</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <section class="page-hero" style="padding-bottom:20px;">
+      <div class="container">
+        <div class="section-card">
+          <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+            <div>
+              <span class="eyebrow">Client Portal</span>
+              <h1 class="page-title" style="margin-bottom:10px;">Your Project</h1>
+              <p class="page-copy">
+                View your project details, current status, and updates in one place.
+              </p>
+            </div>
+            <button id="logoutBtn" class="btn secondary">Log Out</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section compact">
+      <div class="container">
+        <div id="portalError" class="section-card" style="display:none; margin-bottom:22px;">
+          <p id="portalErrorText" style="margin:0;"></p>
+        </div>
+
+        <div class="grid-2">
+          <div class="section-card">
+            <span class="eyebrow">Overview</span>
+            <h2 id="portalName" class="section-title">Loading...</h2>
+            <div id="portalMeta" style="display:grid; gap:14px; margin-top:18px;"></div>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Project info</span>
+            <h2 class="section-title">Details</h2>
+            <div id="portalDetails" style="display:grid; gap:14px; margin-top:18px;"></div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:22px;">
+          <div class="section-card">
+            <span class="eyebrow">Updates</span>
+            <h2 class="section-title">Notes</h2>
+            <div id="portalNotes" style="display:grid; gap:12px; margin-top:16px;"></div>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Upcoming</span>
+            <h2 class="section-title">Reminders</h2>
+            <div id="portalReminders" style="display:grid; gap:12px; margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      try {
+        return new Date(value).toLocaleString();
+      } catch {
+        return value;
+      }
+    }
+
+    function block(label, value) {
+      return `
+        <div style="
+          padding:14px 16px;
+          border:1px solid var(--border);
+          border-radius:14px;
+          background:rgba(255,255,255,.02);
+        ">
+          <div class="meta" style="margin-bottom:6px;">${escapeHtml(label)}</div>
+          <div>${escapeHtml(value)}</div>
+        </div>
+      `;
+    }
+
+    function showError(message) {
+      const box = document.getElementById("portalError");
+      const text = document.getElementById("portalErrorText");
+      text.textContent = message;
+      box.style.display = "block";
+    }
+
+    async function loadPortal() {
+      try {
+        const response = await fetch("/api/client/me", {
+          headers: { Accept: "application/json" }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          showError(data.error || "Unable to load portal.");
+          return;
+        }
+
+        const lead = data.lead;
+        const notes = data.notes || [];
+        const reminders = data.reminders || [];
+
+        document.getElementById("portalName").textContent = lead.name || "Client";
+
+        document.getElementById("portalMeta").innerHTML = [
+          block("Email", lead.email || "—"),
+          block("Status", lead.status || "New"),
+          block("Priority", lead.priority || "Normal"),
+          block("Submitted", formatDate(lead.submitted_at))
+        ].join("");
+
+        document.getElementById("portalDetails").innerHTML = [
+          block("Business Name", lead.business_name || "Not provided"),
+          block("Project Type", lead.project_type || "Not provided"),
+          block("Budget Range", lead.budget_range || "Not provided"),
+          block("Source Page", lead.source_page || "—")
+        ].join("");
+
+        document.getElementById("portalNotes").innerHTML =
+          notes.length
+            ? notes.map(note => `
+                <div class="contact-detail" style="display:block;">
+                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                    ${escapeHtml(formatDate(note.created_at))}
+                  </div>
+                  <div>${escapeHtml(note.note || "")}</div>
+                </div>
+              `).join("")
+            : `<div class="contact-detail" style="display:block;">No project notes yet.</div>`;
+
+        document.getElementById("portalReminders").innerHTML =
+          reminders.length
+            ? reminders.map(reminder => `
+                <div class="contact-detail" style="display:block;">
+                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                    ${escapeHtml(formatDate(reminder.remind_at))}
+                  </div>
+                  <div>${escapeHtml(reminder.note || "No note")}</div>
+                </div>
+              `).join("")
+            : `<div class="contact-detail" style="display:block;">No reminders available.</div>`;
+      } catch (error) {
+        showError("Unable to load portal.");
+      }
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch("/api/client/logout", { method: "POST" });
+      window.location.href = "/client/login.html";
+    });
+
+    loadPortal();
+  </script>
+</body>
+</html>
