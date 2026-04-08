@@ -1,1 +1,5 @@
-document.addEventListener('DOMContentLoaded',()=>{const t=document.querySelector('.menu-toggle');const n=document.querySelector('.mobile-nav');if(t&&n){t.addEventListener('click',()=>n.classList.toggle('open'));}document.querySelectorAll('form').forEach((f)=>{f.addEventListener('submit',(e)=>{e.preventDefault();const r=f.querySelector('.form-response');if(r){r.textContent='Thanks. This demo form is styled and ready. Connect it to Formspree, Netlify Forms, Resend, or your own backend to receive submissions live.';}f.reset();});});});
+const toggle = document.querySelector('.menu-toggle');
+const mobileNav = document.querySelector('.mobile-nav');
+if (toggle && mobileNav) {
+  toggle.addEventListener('click', () => mobileNav.classList.toggle('open'));
+}
