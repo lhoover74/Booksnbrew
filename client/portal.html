@@ -65,11 +65,41 @@
           </div>
         </div>
 
-          <div class="section-card" style="margin-top:22px;">
-            <span class="eyebrow">Messages</span>
-            <h2 class="section-title">Project updates</h2>
-            <div id="portalMessages" style="display:grid; gap:12px; margin-top:16px;"></div>
-          </div>
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Messages</span>
+          <h2 class="section-title">Project updates</h2>
+          <div id="portalMessages" style="display:grid; gap:12px; margin-top:16px;"></div>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Reply</span>
+          <h2 class="section-title">Send a message</h2>
+
+          <form id="clientReplyForm" style="margin-top:18px;">
+            <label for="clientReplySubject">Subject</label>
+            <input
+              id="clientReplySubject"
+              name="subject"
+              type="text"
+              placeholder="Question about project progress"
+              required
+            />
+
+            <label for="clientReplyMessage" style="margin-top:14px;">Message</label>
+            <textarea
+              id="clientReplyMessage"
+              name="message"
+              placeholder="Write your message here..."
+              required
+            ></textarea>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn primary">Send Message</button>
+            </div>
+
+            <p id="clientReplyMsg" class="form-response" aria-live="polite"></p>
+          </form>
+        </div>
 
         <div class="section-card" style="margin-top:22px;">
           <span class="eyebrow">Security</span>
@@ -154,18 +184,9 @@
         const notes = data.notes || [];
         const reminders = data.reminders || [];
         const messages = data.messages || [];
+
         document.getElementById("portalName").textContent = lead.name || "Client";
-        document.getElementById("portalMessages").innerHTML =
-  messages.length
-    ? messages.map(item => `
-        <div class="contact-detail" style="display:block;">
-          <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-            ${escapeHtml(formatDate(item.created_at))} • ${escapeHtml(item.subject || "Update")}
-          </div>
-          <div style="line-height:1.8;">${escapeHtml(item.message || "")}</div>
-        </div>
-      `).join("")
-    : `<div class="contact-detail" style="display:block;">No project updates yet.</div>`;
+
         document.getElementById("portalMeta").innerHTML = [
           block("Email", lead.email || "—"),
           block("Status", lead.status || "New"),
@@ -238,6 +259,21 @@
                 </div>
               `).join("")
             : `<div class="contact-detail" style="display:block;">No reminders available.</div>`;
+
+        document.getElementById("portalMessages").innerHTML =
+          messages.length
+            ? messages.map(item => `
+                <div class="contact-detail" style="display:block;">
+                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                    ${escapeHtml(formatDate(item.created_at))} • ${escapeHtml(item.subject || "Update")}
+                  </div>
+                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                    ${escapeHtml(item.sender_name || "")}
+                  </div>
+                  <div style="line-height:1.8;">${escapeHtml(item.message || "")}</div>
+                </div>
+              `).join("")
+            : `<div class="contact-detail" style="display:block;">No project updates yet.</div>`;
       } catch (error) {
         showError("Unable to load portal.");
       }
@@ -246,6 +282,35 @@
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await fetch("/api/client/logout", { method: "POST" });
       window.location.href = "/client/login.html";
+    });
+
+    document.getElementById("clientReplyForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("clientReplyMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+
+        const response = await fetch("/api/client/reply", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to send message.";
+          return;
+        }
+
+        msg.textContent = "Message sent successfully.";
+        event.target.reset();
+        await loadPortal();
+      } catch (error) {
+        msg.textContent = "Unable to send message right now.";
+      }
     });
 
     document.getElementById("changePasswordForm").addEventListener("submit", async (event) => {
