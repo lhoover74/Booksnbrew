@@ -18,7 +18,7 @@
           <span class="eyebrow">Client Portal Admin</span>
           <h1 class="page-title" style="margin-bottom:10px;">Create Client Login</h1>
           <p class="page-copy">
-            Generate secure portal access for a client by linking their lead record to a login.
+            Create a secure client account and send the portal invite email in one flow.
           </p>
         </div>
       </div>
@@ -28,12 +28,15 @@
       <div class="container">
         <div class="grid-2" style="align-items:start;">
           <div class="section-card">
-            <span class="eyebrow">New client access</span>
-            <h2 class="section-title">Create account</h2>
+            <span class="eyebrow">New portal access</span>
+            <h2 class="section-title">Create and send invite</h2>
 
             <form id="clientAccessForm" style="margin-top:18px;">
               <label for="leadId">Lead ID</label>
               <input id="leadId" name="leadId" type="number" placeholder="Example: 12" required />
+
+              <label for="clientName" style="margin-top:14px;">Client Name</label>
+              <input id="clientName" name="name" type="text" placeholder="Client name" required />
 
               <label for="clientEmail" style="margin-top:14px;">Client Email</label>
               <input id="clientEmail" name="email" type="email" placeholder="client@example.com" required />
@@ -42,7 +45,7 @@
               <input id="clientPassword" name="password" type="text" placeholder="Create a temporary password" required />
 
               <div style="margin-top:18px;">
-                <button type="submit" class="btn primary">Create Client Login</button>
+                <button type="submit" class="btn primary">Create Account & Send Invite</button>
               </div>
 
               <p id="clientAccessMsg" class="form-response" aria-live="polite"></p>
@@ -51,7 +54,7 @@
 
           <div class="section-card">
             <span class="eyebrow">Portal info</span>
-            <h2 class="section-title">What to send the client</h2>
+            <h2 class="section-title">Client access details</h2>
 
             <div style="
               margin-top:18px;
@@ -61,7 +64,7 @@
               background:rgba(255,255,255,.02);
             ">
               <div class="meta" style="margin-bottom:8px;">Portal login URL</div>
-              <div id="portalUrl" style="word-break:break-all;">https://booksnbrew.pages.dev/client/login.html</div>
+              <div style="word-break:break-all;">https://booksnbrew.pages.dev/client/login.html</div>
             </div>
 
             <div style="
@@ -71,16 +74,11 @@
               border-radius:16px;
               background:rgba(255,255,255,.02);
             ">
-              <div class="meta" style="margin-bottom:8px;">Recommended workflow</div>
+              <div class="meta" style="margin-bottom:8px;">Admin workflow</div>
               <p style="margin:0;color:var(--muted);line-height:1.8;">
-                Create the account here, then send the client their portal login link,
-                email, and temporary password. After login, they’ll see their project details,
-                notes, and reminders.
+                Enter the lead ID, name, email, and a temporary password. The system will create the login
+                and email the portal invitation to the client automatically.
               </p>
-            </div>
-
-            <div style="margin-top:18px;">
-              <a href="/client/login.html" class="btn secondary">Open Client Login Page</a>
             </div>
           </div>
         </div>
@@ -98,22 +96,34 @@
       try {
         const form = new FormData(event.target);
 
-        const response = await fetch("/api/client/create-account", {
+        const createRes = await fetch("/api/client/create-account", {
           method: "POST",
           body: form
         });
 
-        const data = await response.json();
+        const createData = await createRes.json();
 
-        if (!response.ok || !data.ok) {
-          msg.textContent = data.error || "Failed to create client account.";
+        if (!createRes.ok || !createData.ok) {
+          msg.textContent = createData.error || "Failed to create client account.";
           return;
         }
 
-        msg.textContent = "Client login created successfully.";
+        const inviteRes = await fetch("/api/client/send-invite", {
+          method: "POST",
+          body: form
+        });
+
+        const inviteData = await inviteRes.json();
+
+        if (!inviteRes.ok || !inviteData.ok) {
+          msg.textContent = inviteData.error || "Account created, but invite email failed.";
+          return;
+        }
+
+        msg.textContent = "Client account created and portal invite sent successfully.";
         event.target.reset();
       } catch (error) {
-        msg.textContent = "Unable to create client account right now.";
+        msg.textContent = "Unable to complete this action right now.";
       }
     });
   </script>
