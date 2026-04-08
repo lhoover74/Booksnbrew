@@ -31,13 +31,10 @@ export async function onRequestPost(context) {
     const mode = url.searchParams.get("mode") || "admin";
 
     const form = await request.formData();
-    const file = form.get("file");
+    const uploaded = form.get("file");
+
     let leadId = (form.get("leadId") || "").toString().trim();
     let uploadedBy = "admin";
-
-    if (!(file instanceof File)) {
-      return json({ ok: false, error: "File is required." }, 400);
-    }
 
     if (mode === "client") {
       const cookies = parseCookies(request.headers.get("Cookie"));
@@ -49,13 +46,19 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Lead ID is required." }, 400);
     }
 
+    if (!uploaded || typeof uploaded === "string") {
+      return json({ ok: false, error: "File is required." }, 400);
+    }
+
+    const file = uploaded;
+
     const maxBytes = 10 * 1024 * 1024;
-    if (file.size > maxBytes) {
+    if ((file.size || 0) > maxBytes) {
       return json({ ok: false, error: "File must be 10MB or less." }, 400);
     }
 
     const now = new Date().toISOString();
-    const safeName = sanitizeFileName(file.name);
+    const safeName = sanitizeFileName(file.name || "file");
     const ext = safeName.includes(".") ? safeName.split(".").pop() : "";
     const uniqueKey = `lead-${leadId}/${Date.now()}-${crypto.randomUUID()}${ext ? "." + ext : ""}`;
 
@@ -65,10 +68,7 @@ export async function onRequestPost(context) {
       }
     });
 
-    const publicBase =
-      env.R2_PUBLIC_BASE_URL ||
-      `${url.origin}/files`;
-
+    const publicBase = env.R2_PUBLIC_BASE_URL || `${url.origin}/files`;
     const fileUrl = `${publicBase}/${uniqueKey}`;
 
     await env.DB.prepare(
