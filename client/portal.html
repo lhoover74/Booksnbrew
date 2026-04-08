@@ -58,6 +58,28 @@
             <div id="portalReminders" style="display:grid; gap:12px; margin-top:16px;"></div>
           </div>
         </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Security</span>
+          <h2 class="section-title">Change Password</h2>
+
+          <form id="changePasswordForm" style="margin-top:18px;">
+            <label for="currentPassword">Current Password</label>
+            <input id="currentPassword" name="currentPassword" type="password" required />
+
+            <label for="portalNewPassword" style="margin-top:14px;">New Password</label>
+            <input id="portalNewPassword" name="newPassword" type="password" required />
+
+            <label for="portalConfirmPassword" style="margin-top:14px;">Confirm New Password</label>
+            <input id="portalConfirmPassword" name="confirmPassword" type="password" required />
+
+            <div style="margin-top:18px;">
+              <button type="submit" class="btn primary">Update Password</button>
+            </div>
+
+            <p id="changePasswordMsg" class="form-response" aria-live="polite"></p>
+          </form>
+        </div>
       </div>
     </section>
   </div>
@@ -162,60 +184,40 @@
         showError("Unable to load portal.");
       }
     }
-<div class="section-card" style="margin-top:22px;">
-  <span class="eyebrow">Security</span>
-  <h2 class="section-title">Change Password</h2>
 
-  <form id="changePasswordForm" style="margin-top:18px;">
-    <label for="currentPassword">Current Password</label>
-    <input id="currentPassword" name="currentPassword" type="password" required />
-
-    <label for="portalNewPassword" style="margin-top:14px;">New Password</label>
-    <input id="portalNewPassword" name="newPassword" type="password" required />
-
-    <label for="portalConfirmPassword" style="margin-top:14px;">Confirm New Password</label>
-    <input id="portalConfirmPassword" name="confirmPassword" type="password" required />
-
-    <div style="margin-top:18px;">
-      <button type="submit" class="btn primary">Update Password</button>
-    </div>
-
-    <p id="changePasswordMsg" class="form-response" aria-live="polite"></p>
-  </form>
-</div>
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await fetch("/api/client/logout", { method: "POST" });
       window.location.href = "/client/login.html";
     });
-<script>
-  document.getElementById("changePasswordForm")?.addEventListener("submit", async (event) => {
-    event.preventDefault();
 
-    const msg = document.getElementById("changePasswordMsg");
-    msg.textContent = "";
+    document.getElementById("changePasswordForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
 
-    try {
-      const form = new FormData(event.target);
+      const msg = document.getElementById("changePasswordMsg");
+      msg.textContent = "";
 
-      const response = await fetch("/api/client/change-password", {
-        method: "POST",
-        body: form
-      });
+      try {
+        const form = new FormData(event.target);
 
-      const data = await response.json();
+        const response = await fetch("/api/client/change-password", {
+          method: "POST",
+          body: form
+        });
 
-      if (!response.ok || !data.ok) {
-        msg.textContent = data.error || "Unable to update password.";
-        return;
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to update password.";
+          return;
+        }
+
+        msg.textContent = data.message || "Password updated successfully.";
+        event.target.reset();
+      } catch (error) {
+        msg.textContent = "Unable to update password right now.";
       }
+    });
 
-      msg.textContent = data.message || "Password updated successfully.";
-      event.target.reset();
-    } catch (error) {
-      msg.textContent = "Unable to update password right now.";
-    }
-  });
-</script>
     loadPortal();
   </script>
 </body>
