@@ -6,12 +6,11 @@ async function sha256(text) {
     .join("");
 }
 
-function json(data, status = 200, headers = {}) {
+function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json",
-      ...headers
+      "Content-Type": "application/json"
     }
   });
 }
@@ -48,16 +47,21 @@ export async function onRequestPost(context) {
       `${account.email}|${account.lead_id}|${env.CLIENT_SESSION_SECRET || ""}`
     );
 
-    return json(
-      { ok: true },
-      200,
-      {
-        "Set-Cookie": [
-          `bb_client_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax`,
-          `bb_client_lead_id=${account.lead_id}; Path=/; HttpOnly; Secure; SameSite=Lax`
-        ].join(", ")
-      }
+    const headers = new Headers();
+    headers.set("Content-Type", "application/json");
+    headers.append(
+      "Set-Cookie",
+      `bb_client_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax`
     );
+    headers.append(
+      "Set-Cookie",
+      `bb_client_lead_id=${account.lead_id}; Path=/; HttpOnly; Secure; SameSite=Lax`
+    );
+
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers
+    });
   } catch (error) {
     return json(
       { ok: false, error: error instanceof Error ? error.message : "Login failed." },
