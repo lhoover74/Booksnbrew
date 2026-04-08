@@ -31,7 +31,58 @@
   <form id="projectForm" style="margin-top:18px;">
     <label for="projectTitle">Project Title</label>
     <input id="projectTitle" name="title" type="text" placeholder="Website Build" required />
+<script>
+  async function loadProject() {
+    try {
+      const response = await fetch(`/api/projects/by-lead?leadId=${leadId}`, {
+        headers: { Accept: "application/json" }
+      });
 
+      const data = await response.json();
+      const project = data.project;
+
+      if (!project) return;
+
+      document.getElementById("projectTitle").value = project.title || "";
+      document.getElementById("projectStage").value = project.stage || "Inquiry Received";
+      document.getElementById("projectProgress").value = project.progress ?? 0;
+      document.getElementById("projectTargetDate").value = project.target_date
+        ? String(project.target_date).slice(0, 10)
+        : "";
+      document.getElementById("projectMilestone").value = project.next_milestone || "";
+    } catch (error) {}
+  }
+
+  document.getElementById("projectForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const msg = document.getElementById("projectMsg");
+    msg.textContent = "";
+
+    try {
+      const form = new FormData(event.target);
+      form.append("leadId", leadId);
+
+      const response = await fetch("/api/projects/upsert", {
+        method: "POST",
+        body: form
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.ok) {
+        msg.textContent = data.error || "Unable to save project.";
+        return;
+      }
+
+      msg.textContent = "Project tracker saved successfully.";
+    } catch (error) {
+      msg.textContent = "Unable to save project right now.";
+    }
+  });
+
+  loadProject();
+</script>
     <label for="projectStage" style="margin-top:14px;">Stage</label>
     <select id="projectStage" name="stage" required>
       <option>Inquiry Received</option>
