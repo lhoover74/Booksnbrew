@@ -14,108 +14,326 @@ export async function onRequestPost(context) {
     const message = (formData.get("message") || "").toString().trim();
 
     if (!name || !email) {
-      return new Response(
-        JSON.stringify({ ok: false, error: "Name and email are required." }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
+      return jsonResponse(
+        { ok: false, error: "Name and email are required." },
+        400
       );
     }
 
     const isQuote = formType === "quote";
+    const submittedAt = new Date().toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
 
     const subject = isQuote
-      ? `New Quote Request from ${name}`
-      : `New Contact Inquiry from ${name}`;
+      ? `New Quote Request • ${name}`
+      : `New Contact Inquiry • ${name}`;
 
-    const html = isQuote
-      ? `
-        <h2>New Quote Request</h2>
-        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
-        <p><strong>Business Name:</strong> ${escapeHtml(businessName)}</p>
-        <p><strong>Project Type:</strong> ${escapeHtml(projectType)}</p>
-        <p><strong>Budget Range:</strong> ${escapeHtml(budgetRange)}</p>
-        <p><strong>Project Details:</strong><br>${escapeHtml(projectDetails).replace(/\n/g, "<br>")}</p>
-      `
-      : `
-        <h2>New Contact Inquiry</h2>
-        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
-        <p><strong>Message:</strong><br>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
-      `;
+    const adminHtml = isQuote
+      ? getAdminQuoteEmail({
+          name,
+          email,
+          phone,
+          businessName,
+          projectType,
+          budgetRange,
+          projectDetails,
+          submittedAt
+        })
+      : getAdminContactEmail({
+          name,
+          email,
+          phone,
+          message,
+          submittedAt
+        });
 
-    const html = isQuote
-  ? `
-  <div style="background:#0b0b0c;padding:30px;font-family:Arial,sans-serif;color:#f5ede3;">
-    <div style="max-width:600px;margin:auto;background:#151515;border-radius:12px;padding:24px;">
-      
-      <h2 style="color:#c79058;margin-bottom:10px;">New Quote Request</h2>
-      <p style="color:#d6c6b8;margin-bottom:20px;">You have received a new project inquiry.</p>
+    const autoReplySubject = isQuote
+      ? "We received your quote request • Books and Brews"
+      : "We received your message • Books and Brews";
 
-      <div style="line-height:1.8;">
-        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
-        <p><strong>Business:</strong> ${escapeHtml(businessName)}</p>
-        <p><strong>Project Type:</strong> ${escapeHtml(projectType)}</p>
-        <p><strong>Budget:</strong> ${escapeHtml(budgetRange)}</p>
-        <p><strong>Details:</strong><br>${escapeHtml(projectDetails).replace(/\n/g, "<br>")}</p>
-      </div>
+    const autoReplyHtml = isQuote
+      ? getCustomerQuoteReply({
+          name,
+          businessName,
+          projectType,
+          budgetRange
+        })
+      : getCustomerContactReply({ name });
 
-    </div>
-  </div>
-  `
-  : `
-  <div style="background:#0b0b0c;padding:30px;font-family:Arial,sans-serif;color:#f5ede3;">
-    <div style="max-width:600px;margin:auto;background:#151515;border-radius:12px;padding:24px;">
-      
-      <h2 style="color:#c79058;margin-bottom:10px;">New Contact Inquiry</h2>
-      <p style="color:#d6c6b8;margin-bottom:20px;">You have received a new message.</p>
+    // 1. Send lead email to you
+    const adminSend = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
+        to: ["michael@govdirect.org"],
+        subject,
+        html: adminHtml,
+        replyTo: email
+      })
+    });
 
-      <div style="line-height:1.8;">
-        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
-        <p><strong>Message:</strong><br>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
-      </div>
+    const adminData = await adminSend.json();
 
-    </div>
-  </div>
-  `;
-
-    const resendData = await resendResponse.json();
-
-    if (!resendResponse.ok) {
-      return new Response(
-        JSON.stringify({ ok: false, error: resendData }),
+    if (!adminSend.ok) {
+      return jsonResponse(
         {
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-        }
+          ok: false,
+          error: adminData
+        },
+        500
+      );
+    }
+
+    // 2. Send auto reply to the visitor
+    const customerSend = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
+        to: [email],
+        subject: autoReplySubject,
+        html: autoReplyHtml,
+        replyTo: "michael@govdirect.org"
+      })
+    });
+
+    const customerData = await customerSend.json();
+
+    if (!customerSend.ok) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: customerData
+        },
+        500
       );
     }
 
     return Response.redirect("https://booksnbrew.pages.dev/thank-you.html", 302);
   } catch (error) {
-    return new Response(
-      JSON.stringify({
+    return jsonResponse(
+      {
         ok: false,
         error: error instanceof Error ? error.message : "Unknown error"
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" }
-      }
+      },
+      500
     );
   }
 }
 
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+}
+
+function getAdminContactEmail({ name, email, phone, message, submittedAt }) {
+  return `
+  <div style="margin:0;padding:0;background:#0b0b0c;font-family:Inter,Arial,sans-serif;color:#f5ede3;">
+    <div style="max-width:680px;margin:0 auto;padding:32px 20px;">
+      <div style="background:linear-gradient(180deg,#161313,#100f0f);border:1px solid #2a211d;border-radius:20px;overflow:hidden;">
+        
+        <div style="padding:28px 28px 18px;border-bottom:1px solid #2a211d;background:radial-gradient(circle at top right, rgba(199,144,88,.20), transparent 35%), linear-gradient(180deg,#1b1716,#121111);">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#d6c6b8;margin-bottom:10px;">Books and Brews</div>
+          <h1 style="margin:0;font-size:30px;line-height:1.15;color:#f5ede3;font-family:Georgia,serif;font-weight:700;">
+            New Contact Inquiry
+          </h1>
+          <p style="margin:12px 0 0;color:#d6c6b8;font-size:15px;line-height:1.7;">
+            A new website lead just came in through your contact form.
+          </p>
+        </div>
+
+        <div style="padding:28px;">
+          ${infoRow("Name", name)}
+          ${infoRow("Email", email)}
+          ${infoRow("Phone", phone || "Not provided")}
+          ${infoRow("Submitted", submittedAt)}
+
+          <div style="margin-top:22px;padding:18px 18px 16px;background:#121111;border:1px solid #2a211d;border-radius:14px;">
+            <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#c79058;margin-bottom:10px;">Message</div>
+            <div style="font-size:15px;line-height:1.8;color:#f5ede3;">
+              ${escapeHtml(message || "No message provided.").replace(/\n/g, "<br>")}
+            </div>
+          </div>
+
+          <div style="margin-top:26px;padding:16px 18px;background:rgba(199,144,88,.08);border:1px solid rgba(199,144,88,.24);border-radius:14px;color:#e9d8c8;font-size:14px;line-height:1.7;">
+            Reply directly to this email to respond to <strong>${escapeHtml(name)}</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function getAdminQuoteEmail({
+  name,
+  email,
+  phone,
+  businessName,
+  projectType,
+  budgetRange,
+  projectDetails,
+  submittedAt
+}) {
+  return `
+  <div style="margin:0;padding:0;background:#0b0b0c;font-family:Inter,Arial,sans-serif;color:#f5ede3;">
+    <div style="max-width:680px;margin:0 auto;padding:32px 20px;">
+      <div style="background:linear-gradient(180deg,#161313,#100f0f);border:1px solid #2a211d;border-radius:20px;overflow:hidden;">
+        
+        <div style="padding:28px 28px 18px;border-bottom:1px solid #2a211d;background:radial-gradient(circle at top right, rgba(199,144,88,.20), transparent 35%), linear-gradient(180deg,#1b1716,#121111);">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#d6c6b8;margin-bottom:10px;">Books and Brews</div>
+          <h1 style="margin:0;font-size:30px;line-height:1.15;color:#f5ede3;font-family:Georgia,serif;font-weight:700;">
+            New Quote Request
+          </h1>
+          <p style="margin:12px 0 0;color:#d6c6b8;font-size:15px;line-height:1.7;">
+            A new project inquiry was submitted through your quote form.
+          </p>
+        </div>
+
+        <div style="padding:28px;">
+          ${infoRow("Name", name)}
+          ${infoRow("Email", email)}
+          ${infoRow("Phone", phone || "Not provided")}
+          ${infoRow("Business Name", businessName || "Not provided")}
+          ${infoRow("Project Type", projectType || "Not selected")}
+          ${infoRow("Budget Range", budgetRange || "Not selected")}
+          ${infoRow("Submitted", submittedAt)}
+
+          <div style="margin-top:22px;padding:18px 18px 16px;background:#121111;border:1px solid #2a211d;border-radius:14px;">
+            <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#c79058;margin-bottom:10px;">Project Details</div>
+            <div style="font-size:15px;line-height:1.8;color:#f5ede3;">
+              ${escapeHtml(projectDetails || "No project details provided.").replace(/\n/g, "<br>")}
+            </div>
+          </div>
+
+          <div style="margin-top:26px;padding:16px 18px;background:rgba(199,144,88,.08);border:1px solid rgba(199,144,88,.24);border-radius:14px;color:#e9d8c8;font-size:14px;line-height:1.7;">
+            Reply directly to this email to respond to <strong>${escapeHtml(name)}</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function getCustomerContactReply({ name }) {
+  return `
+  <div style="margin:0;padding:0;background:#0b0b0c;font-family:Inter,Arial,sans-serif;color:#f5ede3;">
+    <div style="max-width:680px;margin:0 auto;padding:32px 20px;">
+      <div style="background:linear-gradient(180deg,#161313,#100f0f);border:1px solid #2a211d;border-radius:20px;overflow:hidden;">
+        
+        <div style="padding:28px 28px 18px;border-bottom:1px solid #2a211d;background:radial-gradient(circle at top right, rgba(199,144,88,.20), transparent 35%), linear-gradient(180deg,#1b1716,#121111);">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#d6c6b8;margin-bottom:10px;">Books and Brews</div>
+          <h1 style="margin:0;font-size:30px;line-height:1.15;color:#f5ede3;font-family:Georgia,serif;font-weight:700;">
+            Thanks for reaching out
+          </h1>
+          <p style="margin:12px 0 0;color:#d6c6b8;font-size:15px;line-height:1.7;">
+            We received your message and will get back to you soon.
+          </p>
+        </div>
+
+        <div style="padding:28px;">
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#f5ede3;">
+            Hi ${escapeHtml(name)},
+          </p>
+
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#d6c6b8;">
+            Thanks for contacting Books and Brews. Your message came through successfully, and we’ll review it as soon as possible.
+          </p>
+
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#d6c6b8;">
+            We focus on building smart, custom websites with a smooth process and clear communication from start to finish.
+          </p>
+
+          <div style="margin-top:20px;padding:16px 18px;background:rgba(199,144,88,.08);border:1px solid rgba(199,144,88,.24);border-radius:14px;color:#e9d8c8;font-size:14px;line-height:1.7;">
+            If your request is project-related, feel free to reply to this email with any extra details, timeline notes, or goals for your site.
+          </div>
+
+          <p style="margin:24px 0 0;font-size:15px;line-height:1.8;color:#f5ede3;">
+            Books and Brews<br>
+            Smart Websites. Smooth Experience.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function getCustomerQuoteReply({ name, businessName, projectType, budgetRange }) {
+  return `
+  <div style="margin:0;padding:0;background:#0b0b0c;font-family:Inter,Arial,sans-serif;color:#f5ede3;">
+    <div style="max-width:680px;margin:0 auto;padding:32px 20px;">
+      <div style="background:linear-gradient(180deg,#161313,#100f0f);border:1px solid #2a211d;border-radius:20px;overflow:hidden;">
+        
+        <div style="padding:28px 28px 18px;border-bottom:1px solid #2a211d;background:radial-gradient(circle at top right, rgba(199,144,88,.20), transparent 35%), linear-gradient(180deg,#1b1716,#121111);">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#d6c6b8;margin-bottom:10px;">Books and Brews</div>
+          <h1 style="margin:0;font-size:30px;line-height:1.15;color:#f5ede3;font-family:Georgia,serif;font-weight:700;">
+            Quote request received
+          </h1>
+          <p style="margin:12px 0 0;color:#d6c6b8;font-size:15px;line-height:1.7;">
+            Thanks for sending your project details. We’ll review everything and follow up soon.
+          </p>
+        </div>
+
+        <div style="padding:28px;">
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#f5ede3;">
+            Hi ${escapeHtml(name)},
+          </p>
+
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#d6c6b8;">
+            We received your quote request${businessName ? ` for <strong>${escapeHtml(businessName)}</strong>` : ""} and will take a look at the details you submitted.
+          </p>
+
+          <div style="margin:20px 0;padding:18px;background:#121111;border:1px solid #2a211d;border-radius:14px;">
+            <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#c79058;margin-bottom:10px;">Request Summary</div>
+            <p style="margin:0 0 10px;font-size:15px;line-height:1.8;color:#f5ede3;">
+              <strong>Project Type:</strong> ${escapeHtml(projectType || "Not specified")}
+            </p>
+            <p style="margin:0;font-size:15px;line-height:1.8;color:#f5ede3;">
+              <strong>Budget Range:</strong> ${escapeHtml(budgetRange || "Not specified")}
+            </p>
+          </div>
+
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#d6c6b8;">
+            If you want to add anything else before we reply, just respond to this email and it will come straight through.
+          </p>
+
+          <p style="margin:24px 0 0;font-size:15px;line-height:1.8;color:#f5ede3;">
+            Books and Brews<br>
+            Smart Websites. Smooth Experience.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+function infoRow(label, value) {
+  return `
+    <div style="padding:14px 16px;margin-bottom:12px;background:#121111;border:1px solid #2a211d;border-radius:14px;">
+      <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#c79058;margin-bottom:6px;">${escapeHtml(label)}</div>
+      <div style="font-size:15px;line-height:1.7;color:#f5ede3;">${escapeHtml(value || "Not provided")}</div>
+    </div>
+  `;
+}
+
 function escapeHtml(str) {
-  return str
+  return String(str)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
