@@ -29,7 +29,47 @@
       <div class="container">
         <div id="portalError" class="section-card" style="display:none; margin-bottom:22px;">
           <p id="portalErrorText" style="margin:0;"></p>
+        </div><div class="section-card" style="margin-top:22px;">
+  <span class="eyebrow">Project tracker</span>
+  <h2 class="section-title">Progress</h2>
+
+  <div id="projectTrackerWrap" style="margin-top:18px;"></div>
+</div>const lead = data.lead;
+const notes = data.notes || [];
+const reminders = data.reminders || [];const project = data.project || null;document.getElementById("projectTrackerWrap").innerHTML = project
+  ? `
+    <div style="display:grid; gap:14px;">
+      ${block("Project Title", project.title || "—")}
+      ${block("Current Stage", project.stage || "—")}
+      ${block("Target Date", formatDate(project.target_date))}
+      ${block("Next Milestone", project.next_milestone || "—")}
+
+      <div style="
+        padding:18px;
+        border:1px solid var(--border);
+        border-radius:14px;
+        background:rgba(255,255,255,.02);
+      ">
+        <div class="meta" style="margin-bottom:8px;">Progress</div>
+        <div style="
+          width:100%;
+          height:14px;
+          background:rgba(255,255,255,.08);
+          border-radius:999px;
+          overflow:hidden;
+        ">
+          <div style="
+            width:${Number(project.progress) || 0}%;
+            height:100%;
+            background:linear-gradient(90deg, #c79058, #e0b07d);
+            border-radius:999px;
+          "></div>
         </div>
+        <div style="margin-top:10px;">${Number(project.progress) || 0}% complete</div>
+      </div>
+    </div>
+  `
+  : `<div class="contact-detail" style="display:block;">No project tracker has been published yet.</div>`;
 
         <div class="grid-2">
           <div class="section-card">
