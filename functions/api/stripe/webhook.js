@@ -106,29 +106,51 @@ export async function onRequestPost(context) {
       }
     }
 
-    if (type === "checkout.session.async_payment_failed") {
-      const sessionId = object.id || null;
+    if (
+  type === "checkout.session.completed" ||
+  type === "checkout.session.async_payment_succeeded"
+) {
+  const sessionId = object.id || null;
+  const paymentIntentId = object.payment_intent || null;
+  const customerEmail = object.customer_details?.email || object.customer_email || null;
+  const invoiceId = object.metadata?.invoice_id || null;
+  const now = new Date().toISOString();
 
-      if (sessionId) {
-        const now = new Date().toISOString();
-
-        await env.DB.prepare(
-          `UPDATE invoices
-           SET status = 'Overdue',
-               updated_at = ?
-           WHERE stripe_checkout_session_id = ?`
-        ).bind(now, sessionId).run();
-      }
-    }
-
-    return json({ received: true });
-  } catch (error) {
-    return json(
-      {
-        ok: false,
-        error: error instanceof Error ? error.message : "Webhook failed"
-      },
-      400
-    );
+  if (invoiceId) {
+    await env.DB.prepare(
+      `UPDATE invoices
+       SET status = 'Paid',
+           stripe_checkout_session_id = COALESCE(?, stripe_checkout_session_id),
+           stripe_payment_intent_id = COALESCE(?, stripe_payment_intent_id),
+           stripe_customer_email = COALESCE(?, stripe_customer_email),
+           paid_at = ?,
+           updated_at = ?
+       WHERE id = ?`
+    ).bind(
+      sessionId,
+      paymentIntentId,
+      customerEmail,
+      now,
+      now,
+      invoiceId
+    ).run();
+  } else if (sessionId) {
+    await env.DB.prepare(
+      `UPDATE invoices
+       SET status = 'Paid',
+           stripe_checkout_session_id = COALESCE(?, stripe_checkout_session_id),
+           stripe_payment_intent_id = COALESCE(?, stripe_payment_intent_id),
+           stripe_customer_email = COALESCE(?, stripe_customer_email),
+           paid_at = ?,
+           updated_at = ?
+       WHERE stripe_checkout_session_id = ?`
+    ).bind(
+      sessionId,
+      paymentIntentId,
+      customerEmail,
+      now,
+      now,
+      sessionId
+    ).run();
   }
 }
