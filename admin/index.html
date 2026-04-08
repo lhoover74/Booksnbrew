@@ -7,28 +7,119 @@
   <link rel="stylesheet" href="/assets/css/styles.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Admin Dashboard</h1>
+  <div class="site-shell">
+    <section class="page-hero" style="padding-bottom:20px;">
+      <div class="container">
+        <div class="section-card" style="
+          background:
+            radial-gradient(circle at top right, rgba(199,144,88,.14), transparent 30%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+        ">
+          <span class="eyebrow">Books and Brews Admin</span>
+          <h1 class="page-title" style="margin-bottom:10px;">Dashboard</h1>
+          <p class="page-copy" style="max-width:760px;">
+            Manage leads, client access, pipeline progress, and project delivery from one place.
+          </p>
+        </div>
+      </div>
+    </section>
 
-    <div id="admin-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0;"></div>
+    <section class="section compact" style="padding-top:10px;">
+      <div class="container">
+        <div id="admin-stats" class="grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;"></div>
 
-    <h2>Recent Leads</h2>
-    <table style="width:100%;">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Type</th>
-          <th>Budget</th>
-          <th>Status</th>
-          <th>Submitted</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="recent-leads"></tbody>
-    </table>
+        <div class="grid-2" style="margin-top:22px; align-items:start;">
+          <div class="section-card">
+            <span class="eyebrow">Quick actions</span>
+            <h2 class="section-title">Admin tools</h2>
+
+            <div style="display:grid; gap:12px; margin-top:18px;">
+              <a href="/admin/leads.html" class="btn primary">View All Leads</a>
+              <a href="/admin/pipeline.html" class="btn secondary">Open Pipeline</a>
+              <a href="/admin/client-access.html" class="btn secondary">Create Client Access</a>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Recent leads</span>
+            <h2 class="section-title">Newest submissions</h2>
+
+            <div id="recentLeads" style="display:grid; gap:12px; margin-top:18px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <script src="/assets/js/admin.js"></script>
+  <script>
+    async function fetchJson(url) {
+      const res = await fetch(url, {
+        headers: { Accept: "application/json" }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || "Request failed");
+      }
+      return data;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+      try {
+        return new Date(value).toLocaleString();
+      } catch {
+        return value;
+      }
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await fetchJson("/api/leads");
+        const leads = data.leads || [];
+
+        const total = leads.length;
+        const newCount = leads.filter(l => (l.status || "New") === "New").length;
+        const quoteCount = leads.filter(l => l.form_type === "quote").length;
+        const highCount = leads.filter(l => (l.priority || "").toLowerCase() === "high").length;
+
+        document.getElementById("admin-stats").innerHTML = `
+          <div class="section-card"><h2 class="section-title">${total}</h2><p>Total Leads</p></div>
+          <div class="section-card"><h2 class="section-title">${newCount}</h2><p>New Leads</p></div>
+          <div class="section-card"><h2 class="section-title">${quoteCount}</h2><p>Quote Requests</p></div>
+          <div class="section-card"><h2 class="section-title">${highCount}</h2><p>High Priority</p></div>
+        `;
+
+        document.getElementById("recentLeads").innerHTML =
+          leads.slice(0, 6).map(lead => `
+            <div class="contact-detail" style="display:block;">
+              <div style="font-weight:600; margin-bottom:6px;">${escapeHtml(lead.name)}</div>
+              <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                ${escapeHtml(lead.email)} • ${escapeHtml(lead.form_type || "lead")}
+              </div>
+              <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">
+                ${escapeHtml(formatDate(lead.submitted_at))}
+              </div>
+              <a href="/admin/manage.html?id=${lead.id}" class="btn secondary">Manage Lead</a>
+            </div>
+          `).join("") || `<div class="contact-detail" style="display:block;">No leads found yet.</div>`;
+      } catch (error) {
+        document.getElementById("admin-stats").innerHTML =
+          `<div class="section-card"><p>Unable to load stats.</p></div>`;
+        document.getElementById("recentLeads").innerHTML =
+          `<div class="contact-detail" style="display:block;">Unable to load recent leads.</div>`;
+      }
+    }
+
+    loadDashboard();
+  </script>
 </body>
 </html>
