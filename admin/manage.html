@@ -448,40 +448,46 @@
     }
 
     async function loadInvoices() {
-      const list = document.getElementById("invoiceList");
+  const list = document.getElementById("invoiceList");
 
-      try {
-        const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
-        const invoices = response.invoices || [];
+  try {
+    const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
+    const invoices = response.invoices || [];
 
-        list.innerHTML = invoices.length
-          ? invoices.map(item => `
-              <div class="contact-detail" style="display:block;">
-                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-                  ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
-                </div>
-                <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
-                  $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
-                </div>
-                <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                  ${item.payment_url ? `
-                    <a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">
-                      Open Payment Link
-                    </a>
-                  ` : `
-                    <button class="btn secondary" type="button" onclick="generateStripeCheckout('${item.id}')">
-                      Generate Stripe Payment Link
-                    </button>
-                  `}
-                </div>
-              </div>
-            `).join("")
-          : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
-      } catch (error) {
-        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
-      }
-    }
+    list.innerHTML = invoices.length
+      ? invoices.map(item => `
+          <div class="contact-detail" style="display:block;">
+            <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+              ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
+            </div>
+            <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+              $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
+            </div>
+            <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+              ${item.emailed_at ? "Last emailed: " + escapeHtml(formatDate(item.emailed_at)) : "Not emailed yet"}
+            </div>
+            <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              ${item.payment_url ? `
+                <a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">
+                  Open Payment Link
+                </a>
+                <button class="btn secondary" type="button" onclick="resendInvoice('${item.id}')">
+                  Resend Invoice
+                </button>
+              ` : `
+                <button class="btn secondary" type="button" onclick="generateStripeCheckout('${item.id}')">
+                  Generate Stripe Payment Link
+                </button>
+              `}
+            </div>
+          </div>
+        `).join("")
+      : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
+  } catch (error) {
+    list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
+  }
+}
 
     async function generateStripeCheckout(invoiceId) {
   try {
