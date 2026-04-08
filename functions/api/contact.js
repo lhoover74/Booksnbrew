@@ -56,7 +56,7 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
-        to: ["you@yourrealinbox.com"],
+        to: ["michael@govdirect.org"],
         subject,
         html,
         replyTo: email
