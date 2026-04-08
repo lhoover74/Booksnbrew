@@ -19,7 +19,7 @@
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
             Review the lead, update status, manage project progress, create invoices,
-            schedule calls, send updates, and track client communication from one dashboard.
+            upload assets, schedule calls, send updates, and track client communication from one dashboard.
           </p>
         </div>
       </div>
@@ -166,6 +166,27 @@
           <div style="margin-top:24px;">
             <label>Invoice History</label>
             <div id="invoiceList" style="display:grid; gap:12px; margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Asset center</span>
+          <h2 class="section-title">Upload and share files</h2>
+
+          <form id="adminFileForm" style="margin-top:18px;">
+            <label for="adminFileInput">Upload File</label>
+            <input id="adminFileInput" name="file" type="file" required />
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn primary">Upload File</button>
+            </div>
+
+            <p id="adminFileMsg" class="form-response" aria-live="polite"></p>
+          </form>
+
+          <div style="margin-top:24px;">
+            <label>Files</label>
+            <div id="adminFileList" style="display:grid; gap:12px; margin-top:12px;"></div>
           </div>
         </div>
 
@@ -434,7 +455,6 @@
       try {
         const response = await fetchJson(`/api/projects/by-lead?leadId=${leadId}`);
         const project = response.project;
-
         if (!project) return;
 
         document.getElementById("projectTitle").value = project.title || "";
@@ -538,6 +558,31 @@
         alert("Invoice emailed successfully.");
       } catch (error) {
         alert("Unable to resend invoice right now.");
+      }
+    }
+
+    async function loadFiles() {
+      const list = document.getElementById("adminFileList");
+
+      try {
+        const response = await fetchJson(`/api/files/by-lead?leadId=${leadId}`);
+        const files = response.files || [];
+
+        list.innerHTML = files.length
+          ? files.map(item => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(item.file_name)} • ${escapeHtml(item.uploaded_by || "admin")}
+                </div>
+                <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                  ${escapeHtml(item.file_type || "file")} • ${escapeHtml(formatDate(item.created_at))}
+                </div>
+                <a class="btn secondary" href="${escapeHtml(item.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No files uploaded yet.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load files.</div>`;
       }
     }
 
@@ -689,6 +734,36 @@
       }
     });
 
+    document.getElementById("adminFileForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("adminFileMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        const response = await fetch("/api/files/upload?mode=admin", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to upload file.";
+          return;
+        }
+
+        msg.textContent = "File uploaded successfully.";
+        event.target.reset();
+        await loadFiles();
+      } catch (error) {
+        msg.textContent = "Unable to upload file right now.";
+      }
+    });
+
     document.getElementById("noteForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const msg = document.getElementById("noteMsg");
@@ -797,6 +872,7 @@
     loadLead();
     loadProject();
     loadInvoices();
+    loadFiles();
     loadNotes();
     loadReminders();
     loadMessages();
