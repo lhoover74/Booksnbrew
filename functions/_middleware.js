@@ -32,14 +32,15 @@ export async function onRequest(context) {
     path.startsWith("/admin") && !path.startsWith("/admin/login");
 
   const protectAdminApi =
-    path.startsWith("/api/leads") ||
-    path.startsWith("/api/notes") ||
-    path.startsWith("/api/reminders") ||
-    path.startsWith("/api/bookings") ||
-    path.startsWith("/api/projects") ||
-    path.startsWith("/api/client/create-account") ||
-    path.startsWith("/api/client/send-invite") ||
-    path.startsWith("/api/client/send-update");
+  path.startsWith("/api/leads") ||
+  path.startsWith("/api/notes") ||
+  path.startsWith("/api/reminders") ||
+  path.startsWith("/api/bookings") ||
+  path.startsWith("/api/projects") ||
+  path.startsWith("/api/messages") ||
+  path.startsWith("/api/client/create-account") ||
+  path.startsWith("/api/client/send-invite") ||
+  path.startsWith("/api/client/send-update");
 
   const protectClientPage =
     path === "/client/portal.html";
