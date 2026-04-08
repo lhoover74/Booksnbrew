@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Books and Brews</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Dashboard</h1>
+
+    <div id="admin-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0;"></div>
+
+    <h2>Recent Leads</h2>
+    <table style="width:100%;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>Budget</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="recent-leads"></tbody>
+    </table>
+  </div>
+
+  <script src="/assets/js/admin.js"></script>
+</body>
+</html>
