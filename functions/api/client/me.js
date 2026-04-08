@@ -51,13 +51,18 @@ export async function onRequestGet(context) {
       `SELECT * FROM project_messages WHERE lead_id = ? ORDER BY id DESC`
     ).bind(leadId).all();
 
+    const invoicesResult = await env.DB.prepare(
+      `SELECT * FROM invoices WHERE lead_id = ? ORDER BY id DESC`
+    ).bind(leadId).all();
+
     return json({
       ok: true,
       lead,
       project: project || null,
       notes: notesResult.results || [],
       reminders: remindersResult.results || [],
-      messages: messagesResult.results || []
+      messages: messagesResult.results || [],
+      invoices: invoicesResult.results || []
     });
   } catch (error) {
     return json(
