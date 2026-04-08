@@ -47,12 +47,17 @@ export async function onRequestGet(context) {
       `SELECT * FROM lead_reminders WHERE lead_id = ? ORDER BY remind_at ASC`
     ).bind(leadId).all();
 
+    const messagesResult = await env.DB.prepare(
+      `SELECT * FROM project_messages WHERE lead_id = ? ORDER BY id DESC`
+    ).bind(leadId).all();
+
     return json({
       ok: true,
       lead,
       project: project || null,
       notes: notesResult.results || [],
-      reminders: remindersResult.results || []
+      reminders: remindersResult.results || [],
+      messages: messagesResult.results || []
     });
   } catch (error) {
     return json(
