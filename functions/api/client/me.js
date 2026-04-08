@@ -29,29 +29,28 @@ export async function onRequestGet(context) {
 
     const lead = await env.DB.prepare(
       `SELECT * FROM leads WHERE id = ? LIMIT 1`
-    )
-      .bind(leadId)
-      .first();
+    ).bind(leadId).first();
 
     if (!lead) {
       return json({ ok: false, error: "Lead not found." }, 404);
     }
 
+    const project = await env.DB.prepare(
+      `SELECT * FROM client_projects WHERE lead_id = ? LIMIT 1`
+    ).bind(leadId).first();
+
     const notesResult = await env.DB.prepare(
       `SELECT * FROM lead_notes WHERE lead_id = ? ORDER BY id DESC`
-    )
-      .bind(leadId)
-      .all();
+    ).bind(leadId).all();
 
     const remindersResult = await env.DB.prepare(
       `SELECT * FROM lead_reminders WHERE lead_id = ? ORDER BY remind_at ASC`
-    )
-      .bind(leadId)
-      .all();
+    ).bind(leadId).all();
 
     return json({
       ok: true,
       lead,
+      project: project || null,
       notes: notesResult.results || [],
       reminders: remindersResult.results || []
     });
