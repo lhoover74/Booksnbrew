@@ -18,8 +18,8 @@
           <span class="eyebrow">Admin CRM</span>
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
-            Review the lead, update status, manage project progress, add notes, set reminders,
-            schedule calls, send updates, and manage invoices from one dashboard.
+            Review the lead, update status, manage project progress, create invoices,
+            schedule calls, send updates, and track client communication from one dashboard.
           </p>
         </div>
       </div>
@@ -448,74 +448,98 @@
     }
 
     async function loadInvoices() {
-  const list = document.getElementById("invoiceList");
+      const list = document.getElementById("invoiceList");
 
-  try {
-    const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
-    const invoices = response.invoices || [];
+      try {
+        const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
+        const invoices = response.invoices || [];
 
-    list.innerHTML = invoices.length
-      ? invoices.map(item => `
-          <div class="contact-detail" style="display:block;">
-            <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-              ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
-            </div>
-            <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
-              $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
-            </div>
-            <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
-              ${item.emailed_at ? "Last emailed: " + escapeHtml(formatDate(item.emailed_at)) : "Not emailed yet"}
-            </div>
-            <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              ${item.payment_url ? `
-                <a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">
-                  Open Payment Link
-                </a>
-                <button class="btn secondary" type="button" onclick="resendInvoice('${item.id}')">
-                  Resend Invoice
-                </button>
-              ` : `
-                <button class="btn secondary" type="button" onclick="generateStripeCheckout('${item.id}')">
-                  Generate Stripe Payment Link
-                </button>
-              `}
-            </div>
-          </div>
-        `).join("")
-      : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
-  } catch (error) {
-    list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
-  }
-}
-
-    async function generateStripeCheckout(invoiceId) {
-  try {
-    const form = new FormData();
-    form.append("invoiceId", invoiceId);
-
-    const response = await fetch("/api/stripe/create-checkout-session", {
-      method: "POST",
-      body: form
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      alert(
-        typeof data.error === "string"
-          ? data.error
-          : data.error?.message || data.warning || "Unable to generate Stripe payment link."
-      );
-      return;
+        list.innerHTML = invoices.length
+          ? invoices.map(item => `
+              <div class="contact-detail" style="display:block;">
+                <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
+                  ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
+                </div>
+                <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                  $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
+                </div>
+                <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
+                  ${item.emailed_at ? "Last emailed: " + escapeHtml(formatDate(item.emailed_at)) : "Not emailed yet"}
+                </div>
+                <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  ${item.payment_url ? `
+                    <a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">
+                      Open Payment Link
+                    </a>
+                    <button class="btn secondary" type="button" onclick="resendInvoice('${item.id}')">
+                      Resend Invoice
+                    </button>
+                  ` : `
+                    <button class="btn secondary" type="button" onclick="generateStripeCheckout('${item.id}')">
+                      Generate Stripe Payment Link
+                    </button>
+                  `}
+                </div>
+              </div>
+            `).join("")
+          : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
+      } catch (error) {
+        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
+      }
     }
 
-    await loadInvoices();
-    alert("Stripe payment link generated and emailed successfully.");
-  } catch (error) {
-    alert("Unable to generate Stripe payment link right now.");
-  }
-}
+    async function generateStripeCheckout(invoiceId) {
+      try {
+        const form = new FormData();
+        form.append("invoiceId", invoiceId);
+
+        const response = await fetch("/api/stripe/create-checkout-session", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          alert(
+            typeof data.error === "string"
+              ? data.error
+              : data.error?.message || data.warning || "Unable to generate Stripe payment link."
+          );
+          return;
+        }
+
+        await loadInvoices();
+        alert("Stripe payment link generated and emailed successfully.");
+      } catch (error) {
+        alert("Unable to generate Stripe payment link right now.");
+      }
+    }
+
+    async function resendInvoice(invoiceId) {
+      try {
+        const form = new FormData();
+        form.append("invoiceId", invoiceId);
+
+        const response = await fetch("/api/invoices/resend", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          alert(data.error || "Unable to resend invoice.");
+          return;
+        }
+
+        await loadInvoices();
+        alert("Invoice emailed successfully.");
+      } catch (error) {
+        alert("Unable to resend invoice right now.");
+      }
+    }
 
     async function loadNotes() {
       const list = document.getElementById("notesList");
