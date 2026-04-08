@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Login | Books and Brews</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <section class="page-hero">
+      <div class="container">
+        <div class="section-card" style="max-width:560px;margin:0 auto;">
+          <span class="eyebrow">Client Portal</span>
+          <h1 class="page-title">Secure Client Login</h1>
+          <p class="page-copy">
+            Log in to view your project details, status, notes, and reminders.
+          </p>
+
+          <form id="clientLoginForm" style="margin-top:22px;">
+            <label for="clientEmail">Email</label>
+            <input id="clientEmail" name="email" type="email" required />
+
+            <label for="clientPassword" style="margin-top:14px;">Password</label>
+            <input id="clientPassword" name="password" type="password" required />
+
+            <div style="margin-top:18px;">
+              <button type="submit" class="btn primary">Log In</button>
+            </div>
+
+            <p id="clientLoginMsg" class="form-response" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.getElementById("clientLoginForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("clientLoginMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+
+        const response = await fetch("/api/client/login", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          msg.textContent = data.error || "Login failed.";
+          return;
+        }
+
+        window.location.href = "/client/portal.html";
+      } catch (error) {
+        msg.textContent = "Unable to log in right now.";
+      }
+    });
+  </script>
+</body>
+</html>
