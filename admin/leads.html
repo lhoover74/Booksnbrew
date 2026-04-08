@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leads | Admin</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>All Leads</h1>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <input id="leadSearch" placeholder="Search leads" />
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option>New</option>
+        <option>Contacted</option>
+        <option>Qualified</option>
+        <option>Won</option>
+        <option>Lost</option>
+      </select>
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option value="contact">Contact</option>
+        <option value="quote">Quote</option>
+      </select>
+    </div>
+
+    <table style="width:100%;">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>Budget</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Submitted</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="leads-table-body"></tbody>
+    </table>
+  </div>
+
+  <script src="/assets/js/admin.js"></script>
+</body>
+</html>
