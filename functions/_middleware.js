@@ -38,6 +38,7 @@ export async function onRequest(context) {
   path.startsWith("/api/bookings") ||
   path.startsWith("/api/projects") ||
   path.startsWith("/api/messages") ||
+  path.startsWith("/api/invoices") ||
   path.startsWith("/api/client/create-account") ||
   path.startsWith("/api/client/send-invite") ||
   path.startsWith("/api/client/send-update");
