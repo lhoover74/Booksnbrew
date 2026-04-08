@@ -18,8 +18,8 @@
           <span class="eyebrow">Admin CRM</span>
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
-            Review the lead, update their pipeline status, add internal notes, set reminders,
-            schedule a follow-up call, and manage project progress from one clean dashboard.
+            Review the lead, update status, manage project progress, add notes, set reminders,
+            schedule calls, and send client updates from one dashboard.
           </p>
         </div>
       </div>
@@ -96,7 +96,7 @@
             ">
               <div class="meta" style="margin-bottom:8px;">Quick note</div>
               <p style="margin:0;color:var(--muted);line-height:1.75;">
-                Keep lead statuses current so your dashboard, pipeline, and follow-ups stay organized.
+                Keep statuses and project progress current so your dashboard and client portal stay accurate.
               </p>
             </div>
           </div>
@@ -238,6 +238,36 @@
               <p id="bookingMsg" class="form-response" aria-live="polite"></p>
             </form>
           </div>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Client communication</span>
+          <h2 class="section-title">Send update to client</h2>
+
+          <form id="clientUpdateForm" style="margin-top:18px;">
+            <label for="updateSubject">Subject</label>
+            <input
+              id="updateSubject"
+              name="subject"
+              type="text"
+              placeholder="Your project update from Books and Brews"
+              required
+            />
+
+            <label for="updateMessage" style="margin-top:14px;">Message</label>
+            <textarea
+              id="updateMessage"
+              name="message"
+              placeholder="Write your update to the client..."
+              required
+            ></textarea>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn primary">Send Update to Client</button>
+            </div>
+
+            <p id="clientUpdateMsg" class="form-response" aria-live="polite"></p>
+          </form>
         </div>
       </div>
     </section>
@@ -536,6 +566,43 @@
         document.getElementById("bookingNotes").value = "";
       } catch (error) {
         msg.textContent = error.message || "Unable to schedule call.";
+      }
+    });
+
+    document.getElementById("clientUpdateForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("clientUpdateMsg");
+      msg.textContent = "";
+
+      try {
+        const subject = document.getElementById("updateSubject").value.trim();
+        const message = document.getElementById("updateMessage").value.trim();
+        const email = document.getElementById("leadEmail").textContent.trim();
+        const name = document.getElementById("leadName").textContent.trim();
+
+        const form = new FormData();
+        form.append("email", email);
+        form.append("name", name);
+        form.append("subject", subject);
+        form.append("message", message);
+
+        const response = await fetch("/api/client/send-update", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to send update.";
+          return;
+        }
+
+        msg.textContent = "Update sent successfully.";
+        event.target.reset();
+      } catch (error) {
+        msg.textContent = "Unable to send update right now.";
       }
     });
 
