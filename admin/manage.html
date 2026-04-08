@@ -464,13 +464,15 @@
                   $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
                 </div>
                 <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
-                ${item.payment_url ? `<a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">Open Payment Link</a>` : ""}
-              </div>
-            `).join("")
-          : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
-      } catch (error) {
-        list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
-      }
+                ${item.payment_url ? `
+  <a class="btn secondary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">
+    Open Payment Link
+  </a>
+` : `
+  <button class="btn secondary" type="button" onclick="generateStripeCheckout('${item.id}')">
+    Generate Stripe Payment Link
+  </button>
+`}
     }
 
     async function loadNotes() {
@@ -516,6 +518,30 @@
         list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load reminders.</div>`;
       }
     }
+
+      async function generateStripeCheckout(invoiceId) {
+  try {
+    const form = new FormData();
+    form.append("invoiceId", invoiceId);
+
+    const response = await fetch("/api/stripe/create-checkout-session", {
+      method: "POST",
+      body: form
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      alert(data.error?.message || data.error || "Unable to generate Stripe payment link.");
+      return;
+    }
+
+    await loadInvoices();
+    alert("Stripe payment link generated successfully.");
+  } catch (error) {
+    alert("Unable to generate Stripe payment link right now.");
+  }
+}
 
     async function loadMessages() {
       const list = document.getElementById("adminMessagesList");
