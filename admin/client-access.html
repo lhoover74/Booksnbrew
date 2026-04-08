@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Client Access | Books and Brews</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <section class="page-hero" style="padding-bottom:20px;">
+      <div class="container">
+        <div class="section-card" style="
+          background:
+            radial-gradient(circle at top right, rgba(199,144,88,.14), transparent 30%),
+            linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+        ">
+          <span class="eyebrow">Client Portal Admin</span>
+          <h1 class="page-title" style="margin-bottom:10px;">Create Client Login</h1>
+          <p class="page-copy">
+            Generate secure portal access for a client by linking their lead record to a login.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section compact" style="padding-top:10px;">
+      <div class="container">
+        <div class="grid-2" style="align-items:start;">
+          <div class="section-card">
+            <span class="eyebrow">New client access</span>
+            <h2 class="section-title">Create account</h2>
+
+            <form id="clientAccessForm" style="margin-top:18px;">
+              <label for="leadId">Lead ID</label>
+              <input id="leadId" name="leadId" type="number" placeholder="Example: 12" required />
+
+              <label for="clientEmail" style="margin-top:14px;">Client Email</label>
+              <input id="clientEmail" name="email" type="email" placeholder="client@example.com" required />
+
+              <label for="clientPassword" style="margin-top:14px;">Temporary Password</label>
+              <input id="clientPassword" name="password" type="text" placeholder="Create a temporary password" required />
+
+              <div style="margin-top:18px;">
+                <button type="submit" class="btn primary">Create Client Login</button>
+              </div>
+
+              <p id="clientAccessMsg" class="form-response" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Portal info</span>
+            <h2 class="section-title">What to send the client</h2>
+
+            <div style="
+              margin-top:18px;
+              padding:18px;
+              border:1px solid var(--border);
+              border-radius:16px;
+              background:rgba(255,255,255,.02);
+            ">
+              <div class="meta" style="margin-bottom:8px;">Portal login URL</div>
+              <div id="portalUrl" style="word-break:break-all;">https://booksnbrew.pages.dev/client/login.html</div>
+            </div>
+
+            <div style="
+              margin-top:16px;
+              padding:18px;
+              border:1px solid var(--border);
+              border-radius:16px;
+              background:rgba(255,255,255,.02);
+            ">
+              <div class="meta" style="margin-bottom:8px;">Recommended workflow</div>
+              <p style="margin:0;color:var(--muted);line-height:1.8;">
+                Create the account here, then send the client their portal login link,
+                email, and temporary password. After login, they’ll see their project details,
+                notes, and reminders.
+              </p>
+            </div>
+
+            <div style="margin-top:18px;">
+              <a href="/client/login.html" class="btn secondary">Open Client Login Page</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.getElementById("clientAccessForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("clientAccessMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+
+        const response = await fetch("/api/client/create-account", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Failed to create client account.";
+          return;
+        }
+
+        msg.textContent = "Client login created successfully.";
+        event.target.reset();
+      } catch (error) {
+        msg.textContent = "Unable to create client account right now.";
+      }
+    });
+  </script>
+</body>
+</html>
