@@ -26,6 +26,7 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   const path = url.pathname;
+  const cookies = parseCookies(request.headers.get("Cookie"));
 
   const protectAdminPage =
     path.startsWith("/admin") && !path.startsWith("/admin/login");
@@ -35,8 +36,10 @@ export async function onRequest(context) {
     path.startsWith("/api/notes") ||
     path.startsWith("/api/reminders") ||
     path.startsWith("/api/bookings") ||
+    path.startsWith("/api/projects") ||
     path.startsWith("/api/client/create-account") ||
-    path.startsWith("/api/client/send-invite");
+    path.startsWith("/api/client/send-invite") ||
+    path.startsWith("/api/client/send-update");
 
   const protectClientPage =
     path === "/client/portal.html";
@@ -44,8 +47,6 @@ export async function onRequest(context) {
   const protectClientApi =
     path.startsWith("/api/client/me") ||
     path.startsWith("/api/client/change-password");
-
-  const cookies = parseCookies(request.headers.get("Cookie"));
 
   if (protectAdminPage || protectAdminApi) {
     const adminToken = cookies.bb_admin_session;
