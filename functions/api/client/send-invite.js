@@ -36,20 +36,20 @@ async function hashPassword(password) {
   );
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iterations = 120000;
+  const iterations = 100000;
 
-  const bits = await crypto.subtle.deriveBits(
+  const hash = await crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
-      hash: "SHA-256",
       salt,
-      iterations
+      iterations,
+      hash: "SHA-256"
     },
     keyMaterial,
     256
   );
 
-  const hashBytes = new Uint8Array(bits);
+  const hashBytes = new Uint8Array(hash);
 
   function toBase64(bytes) {
     let binary = "";

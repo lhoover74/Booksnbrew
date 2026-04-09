@@ -56,7 +56,7 @@ export async function sha256Hex(text) {
   return bytesToHex(new Uint8Array(digest));
 }
 
-async function pbkdf2(password, saltBytes, iterations = 120000) {
+async function pbkdf2(password, saltBytes, iterations = 100000) {
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
     textToBytes(password),
@@ -65,23 +65,23 @@ async function pbkdf2(password, saltBytes, iterations = 120000) {
     ["deriveBits"]
   );
 
-  const bits = await crypto.subtle.deriveBits(
+  const hash = await crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
-      hash: "SHA-256",
       salt: saltBytes,
-      iterations
+      iterations,
+      hash: "SHA-256"
     },
     keyMaterial,
     256
   );
 
-  return new Uint8Array(bits);
+  return new Uint8Array(hash);
 }
 
 export async function hashPassword(password) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iterations = 120000;
+  const iterations = 100000;
   const hashBytes = await pbkdf2(password, salt, iterations);
   return `pbkdf2$${iterations}$${bytesToBase64(salt)}$${bytesToBase64(hashBytes)}`;
 }
