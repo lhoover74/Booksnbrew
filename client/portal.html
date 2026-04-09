@@ -16,7 +16,7 @@
               <span class="eyebrow">Client Portal</span>
               <h1 class="page-title" style="margin-bottom:10px;">Your Project</h1>
               <p class="page-copy">
-                View your project details, current status, updates, invoices, files, and progress in one place.
+                View your project details, current status, updates, invoices, and progress in one place.
               </p>
             </div>
             <button id="logoutBtn" class="btn secondary">Log Out</button>
@@ -55,24 +55,6 @@
           <span class="eyebrow">Invoices</span>
           <h2 class="section-title">Billing</h2>
           <div id="portalInvoices" style="display:grid; gap:12px; margin-top:16px;"></div>
-        </div>
-
-        <div class="section-card" style="margin-top:22px;">
-          <span class="eyebrow">Files</span>
-          <h2 class="section-title">Asset center</h2>
-
-          <form id="clientFileForm" style="margin-top:18px;">
-            <label for="clientFileInput">Upload File</label>
-            <input id="clientFileInput" name="file" type="file" required />
-
-            <div style="margin-top:16px;">
-              <button type="submit" class="btn primary">Upload File</button>
-            </div>
-
-            <p id="clientFileMsg" class="form-response" aria-live="polite"></p>
-          </form>
-
-          <div id="portalFiles" style="display:grid; gap:12px; margin-top:18px;"></div>
         </div>
 
         <div class="grid-2" style="margin-top:22px;">
@@ -206,7 +188,6 @@
         const lead = data.lead;
         const project = data.project || null;
         const invoices = data.invoices || [];
-        const files = data.files || [];
         const notes = data.notes || [];
         const reminders = data.reminders || [];
         const messages = data.messages || [];
@@ -278,21 +259,6 @@
               `).join("")
             : `<div class="contact-detail" style="display:block;">No invoices available yet.</div>`;
 
-        document.getElementById("portalFiles").innerHTML =
-          files.length
-            ? files.map(item => `
-                <div class="contact-detail" style="display:block;">
-                  <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-                    ${escapeHtml(item.file_name)} • ${escapeHtml(item.uploaded_by || "file")}
-                  </div>
-                  <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
-                    ${escapeHtml(item.file_type || "file")} • ${escapeHtml(formatDate(item.created_at))}
-                  </div>
-                  <a class="btn secondary" href="${escapeHtml(item.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>
-                </div>
-              `).join("")
-            : `<div class="contact-detail" style="display:block;">No files available yet.</div>`;
-
         document.getElementById("portalNotes").innerHTML =
           notes.length
             ? notes.map(note => `
@@ -339,35 +305,6 @@
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await fetch("/api/client/logout", { method: "POST" });
       window.location.href = "/client/login.html";
-    });
-
-    document.getElementById("clientFileForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const msg = document.getElementById("clientFileMsg");
-      msg.textContent = "";
-
-      try {
-        const form = new FormData(event.target);
-
-        const response = await fetch("/api/files/upload?mode=client", {
-          method: "POST",
-          body: form
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.ok) {
-          msg.textContent = data.error || "Unable to upload file.";
-          return;
-        }
-
-        msg.textContent = "File uploaded successfully.";
-        event.target.reset();
-        await loadPortal();
-      } catch (error) {
-        msg.textContent = "Unable to upload file right now.";
-      }
     });
 
     document.getElementById("clientReplyForm").addEventListener("submit", async (event) => {

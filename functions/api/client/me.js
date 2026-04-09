@@ -55,10 +55,6 @@ export async function onRequestGet(context) {
       `SELECT * FROM invoices WHERE lead_id = ? ORDER BY id DESC`
     ).bind(leadId).all();
 
-    const filesResult = await env.DB.prepare(
-      `SELECT * FROM project_files WHERE lead_id = ? ORDER BY id DESC`
-    ).bind(leadId).all();
-
     return json({
       ok: true,
       lead,
@@ -66,8 +62,7 @@ export async function onRequestGet(context) {
       notes: notesResult.results || [],
       reminders: remindersResult.results || [],
       messages: messagesResult.results || [],
-      invoices: invoicesResult.results || [],
-      files: filesResult.results || []
+      invoices: invoicesResult.results || []
     });
   } catch (error) {
     return json(
