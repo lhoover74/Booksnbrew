@@ -5,6 +5,26 @@ function json(data, status = 200) {
   });
 }
 
+function normalizeInvoiceType(value) {
+  const normalized = (value || "").toString().trim().toLowerCase();
+  if (normalized === "deposit" || normalized === "balance" || normalized === "full") {
+    return normalized;
+  }
+  return "full";
+}
+
+function titleCaseInvoiceType(type) {
+  if (type === "deposit") return "Deposit";
+  if (type === "balance") return "Balance";
+  return "Full";
+}
+
+function checkoutLineItemName(invoice) {
+  const invoiceType = normalizeInvoiceType(invoice.invoice_type);
+  const typedLabel = `${titleCaseInvoiceType(invoiceType)} Invoice ${invoice.invoice_number || ""}`.trim();
+  return invoice.notes || typedLabel;
+}
+
 function formEncode(obj) {
   return Object.entries(obj)
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value ?? "")}`)
@@ -21,6 +41,9 @@ function escapeHtml(str) {
 }
 
 async function sendInvoiceEmail(env, lead, invoice, paymentUrl) {
+  const invoiceType = normalizeInvoiceType(invoice.invoice_type);
+  const invoiceTypeLabel = titleCaseInvoiceType(invoiceType);
+
   const invoiceHtml = `
     <!DOCTYPE html>
     <html lang="en">
@@ -66,6 +89,9 @@ async function sendInvoiceEmail(env, lead, invoice, paymentUrl) {
                 </p>
                 <p style="margin:0 0 10px;font-size:15px;line-height:1.8;color:#4f443d;">
                   <strong>Amount:</strong> $${Number(invoice.amount || 0).toFixed(2)}
+                </p>
+                <p style="margin:0 0 10px;font-size:15px;line-height:1.8;color:#4f443d;">
+                  <strong>Type:</strong> ${escapeHtml(invoiceTypeLabel)}
                 </p>
                 <p style="margin:0 0 10px;font-size:15px;line-height:1.8;color:#4f443d;">
                   <strong>Status:</strong> ${escapeHtml(invoice.status || "Sent")}
@@ -129,7 +155,7 @@ async function sendInvoiceEmail(env, lead, invoice, paymentUrl) {
     body: JSON.stringify({
       from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
       to: [lead.email],
-      subject: `Invoice ${invoice.invoice_number} from Books and Brews`,
+      subject: `${invoiceTypeLabel} Invoice ${invoice.invoice_number} from Books and Brews`,
       html: invoiceHtml,
       replyTo: "michael@govdirect.org"
     })
@@ -180,6 +206,8 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Invoice amount must be at least $0.50." }, 400);
     }
 
+    const invoiceType = normalizeInvoiceType(invoice.invoice_type);
+
     let paymentUrl = invoice.payment_url || null;
     let sessionId = invoice.stripe_checkout_session_id || null;
     const now = new Date().toISOString();
@@ -192,12 +220,16 @@ export async function onRequestPost(context) {
         client_reference_id: String(invoice.id),
         customer_email: lead.email || "",
         "line_items[0][price_data][currency]": "usd",
-        "line_items[0][price_data][product_data][name]": invoice.notes || `Invoice ${invoice.invoice_number}`,
+        "line_items[0][price_data][product_data][name]": checkoutLineItemName(invoice),
         "line_items[0][price_data][unit_amount]": String(amountCents),
         "line_items[0][quantity]": "1",
         "metadata[invoice_id]": String(invoice.id),
         "metadata[lead_id]": String(invoice.lead_id),
-        "metadata[invoice_number]": invoice.invoice_number || ""
+        "metadata[invoice_number]": invoice.invoice_number || "",
+        "metadata[invoice_type]": invoiceType,
+        "metadata[parent_invoice_id]": invoice.parent_invoice_id ? String(invoice.parent_invoice_id) : "",
+        "metadata[total_project_amount]": invoice.total_project_amount ? String(invoice.total_project_amount) : "",
+        "metadata[balance_due_amount]": invoice.balance_due_amount ? String(invoice.balance_due_amount) : ""
       };
 
       const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {

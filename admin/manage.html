@@ -160,6 +160,17 @@
           <span class="eyebrow">Invoices</span>
           <h2 class="section-title">Create and manage invoices</h2>
 
+          <div style="margin-top:18px; padding:16px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.02);">
+            <label for="packageSelect">Create Invoice From Package</label>
+            <select id="packageSelect" style="margin-top:8px;">
+              <option value="">Loading packages...</option>
+            </select>
+            <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="createPackageInvoiceBtn" type="button" class="btn secondary">Create Invoice From Package</button>
+            </div>
+            <p id="packageInvoiceMsg" class="form-response" aria-live="polite"></p>
+          </div>
+
           <form id="invoiceForm" style="margin-top:18px;">
             <input type="hidden" id="invoiceId" name="invoiceId" />
 
@@ -176,6 +187,22 @@
               <option>Paid</option>
               <option>Overdue</option>
             </select>
+
+            <label for="invoiceType" style="margin-top:14px;">Invoice Type</label>
+            <select id="invoiceType" name="invoiceType" required>
+              <option value="full">Full</option>
+              <option value="deposit">Deposit</option>
+              <option value="balance">Balance</option>
+            </select>
+
+            <label for="invoiceTotalProjectAmount" style="margin-top:14px;">Total Project Amount (Optional)</label>
+            <input id="invoiceTotalProjectAmount" name="totalProjectAmount" type="number" step="0.01" min="0" placeholder="1200.00" />
+
+            <label for="invoiceDepositPercent" style="margin-top:14px;">Deposit Percent (Optional)</label>
+            <input id="invoiceDepositPercent" name="depositPercent" type="number" step="0.01" min="0" max="100" placeholder="30" />
+
+            <label for="invoiceBalanceDueAmount" style="margin-top:14px;">Remaining Balance (Optional)</label>
+            <input id="invoiceBalanceDueAmount" name="balanceDueAmount" type="number" step="0.01" min="0" placeholder="840.00" />
 
             <label for="invoiceDueDate" style="margin-top:14px;">Due Date</label>
             <input id="invoiceDueDate" name="dueDate" type="date" />
@@ -410,6 +437,59 @@
       return data;
     }
 
+    function normalizeInvoiceType(value) {
+      const normalized = String(value || "").toLowerCase();
+      if (normalized === "deposit" || normalized === "balance" || normalized === "full") {
+        return normalized;
+      }
+      return "full";
+    }
+
+    function invoiceTypeLabel(type) {
+      if (type === "deposit") return "Deposit";
+      if (type === "balance") return "Balance";
+      return "Full";
+    }
+
+    function renderInvoiceTypePill(type) {
+      const normalized = normalizeInvoiceType(type);
+      const color = normalized === "deposit"
+        ? "rgba(199,144,88,.22)"
+        : normalized === "balance"
+          ? "rgba(88,199,160,.18)"
+          : "rgba(255,255,255,.10)";
+
+      return `<span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;background:${color};border:1px solid rgba(255,255,255,.14);">${escapeHtml(invoiceTypeLabel(normalized))}</span>`;
+    }
+
+    function billingBreakdown(item) {
+      const total = Number(item.total_project_amount ?? item.amount ?? 0);
+      const deposit = normalizeInvoiceType(item.invoice_type) === "balance"
+        ? Math.max(0, total - Number(item.amount || 0))
+        : Number(item.amount || 0);
+      const remaining = Number(item.balance_due_amount ?? 0);
+
+      const rows = [];
+      if (total > 0) {
+        rows.push(`<div>Total Project: $${total.toFixed(2)}</div>`);
+      }
+      if (normalizeInvoiceType(item.invoice_type) === "deposit") {
+        rows.push(`<div>Deposit (${Number(item.deposit_percent || 0).toFixed(2).replace(/\.00$/, "")}%) : $${deposit.toFixed(2)}</div>`);
+        rows.push(`<div>Remaining Balance: $${Math.max(0, remaining).toFixed(2)}</div>`);
+      }
+      if (normalizeInvoiceType(item.invoice_type) === "balance") {
+        rows.push(`<div>Deposit Paid: $${deposit.toFixed(2)}</div>`);
+        rows.push(`<div>Balance Due: $${Number(item.amount || 0).toFixed(2)}</div>`);
+      }
+      if (normalizeInvoiceType(item.invoice_type) === "full" && total > 0) {
+        rows.push(`<div>Amount Due: $${Number(item.amount || 0).toFixed(2)}</div>`);
+      }
+
+      return rows.length
+        ? `<div style="font-size:13px; color:var(--muted); margin:6px 0 10px; display:grid; gap:4px;">${rows.join("")}</div>`
+        : "";
+    }
+
     function metaRow(label, value) {
       return `
         <div style="
@@ -505,16 +585,22 @@
       try {
         const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
         const invoices = response.invoices || [];
+        const existingBalanceByParent = new Set(
+          invoices
+            .filter((item) => normalizeInvoiceType(item.invoice_type) === "balance" && item.parent_invoice_id)
+            .map((item) => String(item.parent_invoice_id))
+        );
 
         list.innerHTML = invoices.length
           ? invoices.map(item => `
               <div class="contact-detail" style="display:block;">
                 <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-                  ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
+                  ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")} • ${renderInvoiceTypePill(item.invoice_type)}
                 </div>
                 <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
                   $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
                 </div>
+                ${billingBreakdown(item)}
                 <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
                   ${item.emailed_at ? "Last emailed: " + escapeHtml(formatDate(item.emailed_at)) : "Not emailed yet"}
                 </div>
@@ -532,12 +618,100 @@
                       Generate Stripe Payment Link
                     </button>
                   `}
+                  ${normalizeInvoiceType(item.invoice_type) === "deposit" && String(item.status || "").toLowerCase() === "paid" && Number(item.balance_due_amount || 0) > 0 && !existingBalanceByParent.has(String(item.id)) ? `
+                    <button class="btn secondary" type="button" onclick="createBalanceInvoice('${item.id}')">
+                      Create Remaining Balance Invoice
+                    </button>
+                  ` : ""}
                 </div>
               </div>
             `).join("")
           : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
       } catch (error) {
         list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
+      }
+    }
+
+    async function loadPackages() {
+      const select = document.getElementById("packageSelect");
+      if (!select) return;
+
+      try {
+        const response = await fetchJson("/api/packages/get");
+        const packages = response.packages || [];
+
+        if (!packages.length) {
+          select.innerHTML = `<option value="">No packages found</option>`;
+          return;
+        }
+
+        select.innerHTML = `
+          <option value="">Select package</option>
+          ${packages.map((pkg) => {
+            const name = pkg.name || pkg.title || pkg.description || `Package ${pkg.id}`;
+            const price = Number(pkg.price || 0).toFixed(2);
+            const depositPercent = Number(pkg.deposit_percent || 0);
+            return `<option value="${escapeHtml(String(pkg.id))}">${escapeHtml(name)} • $${price} • ${depositPercent}% deposit</option>`;
+          }).join("")}
+        `;
+      } catch (error) {
+        select.innerHTML = `<option value="">Unable to load packages</option>`;
+      }
+    }
+
+    async function createInvoiceFromPackage() {
+      const packageId = document.getElementById("packageSelect")?.value || "";
+      const msg = document.getElementById("packageInvoiceMsg");
+      msg.textContent = "";
+
+      if (!packageId) {
+        msg.textContent = "Select a package first.";
+        return;
+      }
+
+      try {
+        const form = new FormData();
+        form.append("leadId", leadId);
+        form.append("packageId", packageId);
+
+        const response = await fetch("/api/invoices/create-from-package", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to create invoice from package.";
+          return;
+        }
+
+        msg.textContent = data.message || "Invoice created from package.";
+        await loadInvoices();
+      } catch (error) {
+        msg.textContent = "Unable to create package invoice right now.";
+      }
+    }
+
+    async function createBalanceInvoice(depositInvoiceId) {
+      try {
+        const form = new FormData();
+        form.append("depositInvoiceId", depositInvoiceId);
+
+        const response = await fetch("/api/invoices/create-balance", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          alert(data.error || "Unable to create remaining balance invoice.");
+          return;
+        }
+
+        await loadInvoices();
+        alert("Remaining balance invoice created.");
+      } catch (error) {
+        alert("Unable to create remaining balance invoice right now.");
       }
     }
 
@@ -858,6 +1032,10 @@
       }
     });
 
+    document.getElementById("createPackageInvoiceBtn").addEventListener("click", async () => {
+      await createInvoiceFromPackage();
+    });
+
     document.getElementById("adminFileForm").addEventListener("submit", async (event) => {
       event.preventDefault();
 
@@ -1005,6 +1183,7 @@
 
     loadLead();
     loadProject();
+    loadPackages();
     loadInvoices();
     loadFiles();
     loadNotes();

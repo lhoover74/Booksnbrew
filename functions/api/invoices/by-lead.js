@@ -5,6 +5,17 @@ function json(data, status = 200) {
   });
 }
 
+function normalizeInvoice(invoice) {
+  return {
+    ...invoice,
+    invoice_type: invoice.invoice_type || "full",
+    total_project_amount: invoice.total_project_amount ?? invoice.amount ?? 0,
+    deposit_percent: invoice.deposit_percent ?? 0,
+    balance_due_amount: invoice.balance_due_amount ?? 0,
+    parent_invoice_id: invoice.parent_invoice_id ?? null
+  };
+}
+
 export async function onRequestGet(context) {
   try {
     const { env, request } = context;
@@ -16,10 +27,15 @@ export async function onRequestGet(context) {
     }
 
     const result = await env.DB.prepare(
-      `SELECT * FROM invoices WHERE lead_id = ? ORDER BY id DESC`
+      `SELECT *
+       FROM invoices
+       WHERE lead_id = ?
+       ORDER BY created_at DESC, id DESC`
     ).bind(leadId).all();
 
-    return json({ ok: true, invoices: result.results || [] });
+    const invoices = (result.results || []).map(normalizeInvoice);
+
+    return json({ ok: true, invoices });
   } catch (error) {
     return json(
       { ok: false, error: error instanceof Error ? error.message : "Failed to load invoices." },

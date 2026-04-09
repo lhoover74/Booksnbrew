@@ -189,6 +189,65 @@
       `;
     }
 
+    function normalizeInvoiceType(value) {
+      const normalized = String(value || "").toLowerCase();
+      if (normalized === "deposit" || normalized === "balance" || normalized === "full") {
+        return normalized;
+      }
+      return "full";
+    }
+
+    function invoiceTypeLabel(type) {
+      if (type === "deposit") return "Deposit";
+      if (type === "balance") return "Balance";
+      return "Full";
+    }
+
+    function invoiceTypePill(type) {
+      const normalized = normalizeInvoiceType(type);
+      const bg = normalized === "deposit"
+        ? "rgba(199,144,88,.20)"
+        : normalized === "balance"
+          ? "rgba(88,199,160,.16)"
+          : "rgba(255,255,255,.10)";
+
+      return `<span style="display:inline-block;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700;background:${bg};border:1px solid rgba(255,255,255,.16);">${escapeHtml(invoiceTypeLabel(normalized))}</span>`;
+    }
+
+    function invoiceBreakdown(item) {
+      const type = normalizeInvoiceType(item.invoice_type);
+      const total = Number(item.total_project_amount ?? item.amount ?? 0);
+      const depositPercent = Number(item.deposit_percent || 0);
+      const amount = Number(item.amount || 0);
+      const remaining = Number(item.balance_due_amount || 0);
+
+      const lines = [];
+      if (total > 0) {
+        lines.push(`Total Project Amount: $${total.toFixed(2)}`);
+      }
+
+      if (type === "deposit") {
+        lines.push(`Deposit Due (${depositPercent.toFixed(2).replace(/\.00$/, "")}%) : $${amount.toFixed(2)}`);
+        lines.push(`Remaining Balance: $${Math.max(0, remaining).toFixed(2)}`);
+      }
+
+      if (type === "balance") {
+        const depositPaid = Math.max(0, total - amount);
+        lines.push(`Deposit Paid: $${depositPaid.toFixed(2)}`);
+        lines.push(`Remaining Balance Due: $${amount.toFixed(2)}`);
+      }
+
+      if (type === "full") {
+        lines.push(`Amount Due: $${amount.toFixed(2)}`);
+      }
+
+      if (!lines.length) {
+        return "";
+      }
+
+      return `<div style="font-size:13px; color:var(--muted); margin-bottom:8px; display:grid; gap:4px;">${lines.map((line) => `<div>${escapeHtml(line)}</div>`).join("")}</div>`;
+    }
+
     function showError(message) {
       const box = document.getElementById("portalError");
       const text = document.getElementById("portalErrorText");
@@ -290,11 +349,12 @@
             ? invoices.map(item => `
                 <div class="contact-detail" style="display:block;">
                   <div style="font-size:12px; color:var(--accent); margin-bottom:6px;">
-                    ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")}
+                    ${escapeHtml(item.invoice_number)} • ${escapeHtml(item.status || "Draft")} • ${invoiceTypePill(item.invoice_type)}
                   </div>
                   <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
                     $${Number(item.amount || 0).toFixed(2)} ${item.due_date ? "• Due " + escapeHtml(item.due_date) : ""}
                   </div>
+                  ${invoiceBreakdown(item)}
                   <div style="line-height:1.8; margin-bottom:8px;">${escapeHtml(item.notes || "")}</div>
                   ${item.payment_url ? `<a class="btn primary" href="${escapeHtml(item.payment_url)}" target="_blank" rel="noopener noreferrer">Pay Now</a>` : ""}
                 </div>

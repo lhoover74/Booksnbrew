@@ -17,6 +17,17 @@ function json(data, status = 200) {
   });
 }
 
+function normalizeInvoice(invoice) {
+  return {
+    ...invoice,
+    invoice_type: invoice.invoice_type || "full",
+    total_project_amount: invoice.total_project_amount ?? invoice.amount ?? 0,
+    deposit_percent: invoice.deposit_percent ?? 0,
+    parent_invoice_id: invoice.parent_invoice_id ?? null,
+    balance_due_amount: invoice.balance_due_amount ?? 0
+  };
+}
+
 export async function onRequestGet(context) {
   try {
     const { request, env } = context;
@@ -52,7 +63,10 @@ export async function onRequestGet(context) {
     ).bind(leadId).all();
 
     const invoicesResult = await env.DB.prepare(
-      `SELECT * FROM invoices WHERE lead_id = ? ORDER BY id DESC`
+      `SELECT *
+       FROM invoices
+       WHERE lead_id = ?
+       ORDER BY created_at DESC, id DESC`
     ).bind(leadId).all();
 
     const filesResult = await env.DB.prepare(
@@ -66,7 +80,7 @@ export async function onRequestGet(context) {
       notes: notesResult.results || [],
       reminders: remindersResult.results || [],
       messages: messagesResult.results || [],
-      invoices: invoicesResult.results || [],
+      invoices: (invoicesResult.results || []).map(normalizeInvoice),
       files: filesResult.results || []
     });
   } catch (error) {
