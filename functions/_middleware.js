@@ -25,44 +25,55 @@ async function expectedAdminToken(env) {
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
-  const path = url.pathname;
+  const pathname = url.pathname;
   const cookies = parseCookies(request.headers.get("Cookie"));
 
-  const protectAdminPage =
-    path.startsWith("/admin") && !path.startsWith("/admin/login");
+  const isAdminPage =
+    pathname.startsWith("/admin") &&
+    !pathname.startsWith("/admin/login");
 
-  const protectAdminApi =
-    path.startsWith("/api/leads") ||
-    path.startsWith("/api/notes") ||
-    path.startsWith("/api/reminders") ||
-    path.startsWith("/api/bookings") ||
-    path.startsWith("/api/projects") ||
-    path.startsWith("/api/messages") ||
-    path.startsWith("/api/invoices") ||
-    path.startsWith("/api/files") ||
-    path.startsWith("/api/stripe/create-checkout-session") ||
-    path.startsWith("/api/client/create-account") ||
-    path.startsWith("/api/client/send-invite") ||
-    path.startsWith("/api/client/send-update");
+  const isAdminApi =
+    pathname.startsWith("/api/leads") ||
+    pathname.startsWith("/api/notes") ||
+    pathname.startsWith("/api/reminders") ||
+    pathname.startsWith("/api/bookings") ||
+    pathname.startsWith("/api/projects") ||
+    pathname.startsWith("/api/messages") ||
+    pathname.startsWith("/api/invoices") ||
+    pathname.startsWith("/api/stripe/create-checkout-session") ||
+    pathname.startsWith("/api/client/create-account") ||
+    pathname.startsWith("/api/client/send-invite") ||
+    pathname.startsWith("/api/client/send-update");
 
-  const protectClientPage =
-    path === "/client/portal.html";
+  const isClientPage =
+    pathname === "/client/portal.html";
 
-  const protectClientApi =
-    path.startsWith("/api/client/me") ||
-    path.startsWith("/api/client/change-password") ||
-    path.startsWith("/api/client/reply") ||
-    path.startsWith("/api/files/upload");
+  const isClientApi =
+    pathname.startsWith("/api/client/me") ||
+    pathname.startsWith("/api/client/change-password") ||
+    pathname.startsWith("/api/client/reply");
 
-  if (protectAdminPage || protectAdminApi) {
+  const isFileUploadRoute =
+    pathname.startsWith("/api/files/upload") ||
+    pathname.startsWith("/api/files/by-lead") ||
+    pathname.startsWith("/files/");
+
+  // Let file routes handle their own logic
+  if (isFileUploadRoute) {
+    return next();
+  }
+
+  if (isAdminPage || isAdminApi) {
     const adminToken = cookies.bb_admin_session;
     const validAdminToken = await expectedAdminToken(env);
     const adminAuthenticated = Boolean(
-      adminToken && validAdminToken && adminToken === validAdminToken
+      adminToken &&
+      validAdminToken &&
+      adminToken === validAdminToken
     );
 
     if (!adminAuthenticated) {
-      if (protectAdminApi) {
+      if (isAdminApi) {
         return new Response(
           JSON.stringify({ ok: false, error: "Unauthorized" }),
           {
@@ -76,12 +87,12 @@ export async function onRequest(context) {
     }
   }
 
-  if (protectClientPage || protectClientApi) {
+  if (isClientPage || isClientApi) {
     const clientToken = cookies.bb_client_session;
     const clientLeadId = cookies.bb_client_lead_id;
 
     if (!clientToken || !clientLeadId) {
-      if (protectClientApi) {
+      if (isClientApi) {
         return new Response(
           JSON.stringify({ ok: false, error: "Unauthorized" }),
           {
