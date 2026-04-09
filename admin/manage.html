@@ -19,7 +19,8 @@
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
             Review the lead, update status, manage project progress, deliver final handoff details,
-            create invoices, upload assets, schedule calls, send updates, and track client communication.
+            create invoices, generate pricing from packages, upload assets, schedule calls, send updates,
+            and track client communication.
           </p>
         </div>
       </div>
@@ -153,6 +154,24 @@
             </div>
 
             <p id="completeProjectMsg" class="form-response" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Quick pricing</span>
+          <h2 class="section-title">Create from package</h2>
+
+          <form id="packageForm" style="margin-top:18px;">
+            <label for="packageSelect">Select Package</label>
+            <select id="packageSelect" required>
+              <option value="">Loading packages...</option>
+            </select>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn primary">Create Invoice from Package</button>
+            </div>
+
+            <p id="packageMsg" class="form-response" aria-live="polite"></p>
           </form>
         </div>
 
@@ -579,6 +598,28 @@
       } catch (error) {}
     }
 
+    async function loadPackages() {
+      try {
+        const res = await fetch("/api/packages/get", {
+          headers: { Accept: "application/json" }
+        });
+        const data = await res.json();
+        const select = document.getElementById("packageSelect");
+
+        if (!res.ok || !data.ok) {
+          select.innerHTML = `<option value="">Unable to load packages</option>`;
+          return;
+        }
+
+        const packages = data.packages || [];
+        select.innerHTML = packages.length
+          ? packages.map(p => `<option value="${p.id}">${escapeHtml(p.name)} - $${Number(p.price || 0).toFixed(2)}</option>`).join("")
+          : `<option value="">No packages found</option>`;
+      } catch (error) {
+        document.getElementById("packageSelect").innerHTML = `<option value="">Unable to load packages</option>`;
+      }
+    }
+
     async function loadInvoices() {
       const list = document.getElementById("invoiceList");
 
@@ -961,13 +1002,12 @@
           return;
         }
 
+        const emailForm = new FormData();
+        emailForm.append("leadId", leadId);
+
         await fetch("/api/projects/send-completion-email", {
           method: "POST",
-          body: (() => {
-            const f = new FormData();
-            f.append("leadId", leadId);
-            return f;
-          })()
+          body: emailForm
         });
 
         msg.textContent = "Project marked complete and completion email sent.";
@@ -998,6 +1038,43 @@
         alert("Completion email sent.");
       } catch (error) {
         alert("Unable to send completion email right now.");
+      }
+    });
+
+    document.getElementById("packageForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("packageMsg");
+      msg.textContent = "";
+
+      try {
+        const packageId = document.getElementById("packageSelect").value;
+
+        if (!packageId) {
+          msg.textContent = "Please select a package.";
+          return;
+        }
+
+        const form = new FormData();
+        form.append("leadId", leadId);
+        form.append("packageId", packageId);
+
+        const res = await fetch("/api/invoices/create-from-package", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to create invoice from package.";
+          return;
+        }
+
+        msg.textContent = "Invoice created from package.";
+        await loadInvoices();
+      } catch (error) {
+        msg.textContent = "Unable to create invoice from package right now.";
       }
     });
 
