@@ -1,5 +1,5 @@
-export async function onRequest(context) {
-  const { request, env, params } = context;
+export async function onRequestGet(context) {
+  const { env, params } = context;
 
   const key = params.key;
 
@@ -13,10 +13,13 @@ export async function onRequest(context) {
     return new Response("File not found", { status: 404 });
   }
 
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set("etag", object.httpEtag);
+  headers.set("Cache-Control", "public, max-age=31536000");
+
   return new Response(object.body, {
-    headers: {
-      "Content-Type": object.httpMetadata?.contentType || "application/octet-stream",
-      "Cache-Control": "public, max-age=31536000"
-    }
+    status: 200,
+    headers
   });
 }
