@@ -1,7 +1,9 @@
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json"
+    }
   });
 }
 
@@ -24,10 +26,9 @@ export async function onRequestGet(context) {
 
     let leadId = url.searchParams.get("leadId");
 
-    // Client mode (secure)
     if (!leadId) {
       const cookies = parseCookies(request.headers.get("Cookie"));
-      leadId = cookies.bb_client_lead_id;
+      leadId = cookies.bb_client_lead_id || "";
     }
 
     if (!leadId) {
@@ -35,17 +36,20 @@ export async function onRequestGet(context) {
     }
 
     const result = await env.DB.prepare(`
-      SELECT * FROM project_files
+      SELECT *
+      FROM project_files
       WHERE lead_id = ?
-      ORDER BY created_at DESC
+      ORDER BY created_at DESC, id DESC
     `).bind(leadId).all();
 
     return json({
       ok: true,
       files: result.results || []
     });
-
   } catch (err) {
-    return json({ ok: false, error: err.message || "Failed to load files." }, 500);
+    return json(
+      { ok: false, error: err instanceof Error ? err.message : "Failed to load files." },
+      500
+    );
   }
 }
