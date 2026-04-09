@@ -1,23 +1,22 @@
-export async function onRequestGet(context) {
-  const { env, params } = context;
+export async function onRequest(context) {
+  const { request, env, params } = context;
 
-  const key = Array.isArray(params.key)
-    ? params.key.join("/")
-    : params.key;
+  const key = params.key;
 
   if (!key) {
-    return new Response("Not found", { status: 404 });
+    return new Response("Missing file key", { status: 400 });
   }
 
   const object = await env.ASSETS.get(key);
 
   if (!object) {
-    return new Response("Not found", { status: 404 });
+    return new Response("File not found", { status: 404 });
   }
 
-  const headers = new Headers();
-  object.writeHttpMetadata(headers);
-  headers.set("etag", object.httpEtag);
-
-  return new Response(object.body, { headers });
+  return new Response(object.body, {
+    headers: {
+      "Content-Type": object.httpMetadata?.contentType || "application/octet-stream",
+      "Cache-Control": "public, max-age=31536000"
+    }
+  });
 }
