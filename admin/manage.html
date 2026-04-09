@@ -158,24 +158,6 @@
         </div>
 
         <div class="section-card" style="margin-top:22px;">
-          <span class="eyebrow">Quick pricing</span>
-          <h2 class="section-title">Create from package</h2>
-
-          <form id="packageForm" style="margin-top:18px;">
-            <label for="packageSelect">Select Package</label>
-            <select id="packageSelect" required>
-              <option value="">Loading packages...</option>
-            </select>
-
-            <div style="margin-top:16px;">
-              <button type="submit" class="btn primary">Create Invoice from Package</button>
-            </div>
-
-            <p id="packageMsg" class="form-response" aria-live="polite"></p>
-          </form>
-        </div>
-
-        <div class="section-card" style="margin-top:22px;">
           <span class="eyebrow">Invoices</span>
           <h2 class="section-title">Create and manage invoices</h2>
 
@@ -1038,43 +1020,6 @@
         alert("Completion email sent.");
       } catch (error) {
         alert("Unable to send completion email right now.");
-      }
-    });
-
-    document.getElementById("packageForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-
-      const msg = document.getElementById("packageMsg");
-      msg.textContent = "";
-
-      try {
-        const packageId = document.getElementById("packageSelect").value;
-
-        if (!packageId) {
-          msg.textContent = "Please select a package.";
-          return;
-        }
-
-        const form = new FormData();
-        form.append("leadId", leadId);
-        form.append("packageId", packageId);
-
-        const res = await fetch("/api/invoices/create-from-package", {
-          method: "POST",
-          body: form
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || !data.ok) {
-          msg.textContent = data.error || "Unable to create invoice from package.";
-          return;
-        }
-
-        msg.textContent = "Invoice created from package.";
-        await loadInvoices();
-      } catch (error) {
-        msg.textContent = "Unable to create invoice from package right now.";
       }
     });
 
