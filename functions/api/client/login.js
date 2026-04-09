@@ -1,10 +1,8 @@
-async function sha256(text) {
-  const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import {
+  buildSessionCookies,
+  createClientSession,
+  verifyPassword
+} from "./_auth.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -33,32 +31,23 @@ export async function onRequestPost(context) {
       .bind(email)
       .first();
 
-    if (!account) {
+    if (!account || Number(account.is_active || 1) !== 1) {
       return json({ ok: false, error: "Invalid login." }, 401);
     }
 
-    const incomingHash = await sha256(password);
-
-    if (incomingHash !== account.password_hash) {
+    const isValidPassword = await verifyPassword(password, account.password_hash);
+    if (!isValidPassword) {
       return json({ ok: false, error: "Invalid login." }, 401);
     }
 
-    const sessionToken = await sha256(
-      `${account.email}|${account.lead_id}|${env.CLIENT_SESSION_SECRET || ""}`
-    );
+    const session = await createClientSession(env, account);
+    const cookies = buildSessionCookies(session.token, account);
 
     const headers = new Headers();
     headers.set("Content-Type", "application/json");
-    headers.append(
-      "Set-Cookie",
-      `bb_client_session=${sessionToken}; Path=/; HttpOnly; Secure; SameSite=Lax`
-    );
-    headers.append(
-      "Set-Cookie",
-      `bb_client_lead_id=${account.lead_id}; Path=/; HttpOnly; Secure; SameSite=Lax`
-    );
+    cookies.forEach((cookie) => headers.append("Set-Cookie", cookie));
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, mustChangePassword: Number(account.must_change_password || 0) === 1 }), {
       status: 200,
       headers
     });

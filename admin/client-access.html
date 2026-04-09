@@ -18,7 +18,7 @@
           <span class="eyebrow">Client Portal Admin</span>
           <h1 class="page-title" style="margin-bottom:10px;">Create Client Login</h1>
           <p class="page-copy">
-            Create a secure client account and send the portal invite email in one flow.
+            Create secure client accounts, send portal invites, and resend access in one place.
           </p>
         </div>
       </div>
@@ -29,26 +29,61 @@
         <div class="grid-2" style="align-items:start;">
           <div class="section-card">
             <span class="eyebrow">New portal access</span>
-            <h2 class="section-title">Create and send invite</h2>
+            <h2 class="section-title">Create account</h2>
 
-            <form id="clientAccessForm" style="margin-top:18px;">
-              <label for="leadId">Lead ID</label>
-              <input id="leadId" name="leadId" type="number" placeholder="Example: 12" required />
+            <form id="createClientAccessForm" style="margin-top:18px;">
+              <label for="createLeadId">Lead ID</label>
+              <input id="createLeadId" name="leadId" type="number" placeholder="Example: 12" required />
 
-              <label for="clientName" style="margin-top:14px;">Client Name</label>
-              <input id="clientName" name="name" type="text" placeholder="Client name" required />
+              <label for="createClientName" style="margin-top:14px;">Client Name</label>
+              <input id="createClientName" name="name" type="text" placeholder="Client name" required />
 
-              <label for="clientEmail" style="margin-top:14px;">Client Email</label>
-              <input id="clientEmail" name="email" type="email" placeholder="client@example.com" required />
+              <label for="createClientEmail" style="margin-top:14px;">Client Email</label>
+              <input id="createClientEmail" name="email" type="email" placeholder="client@example.com" required />
 
-              <label for="clientPassword" style="margin-top:14px;">Temporary Password</label>
-              <input id="clientPassword" name="password" type="text" placeholder="Create a temporary password" required />
+              <label for="createClientPassword" style="margin-top:14px;">Temporary Password (Optional)</label>
+              <input id="createClientPassword" name="password" type="text" placeholder="Leave blank to auto-generate" />
+
+              <label style="margin-top:14px; display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input id="createSendInvite" type="checkbox" checked />
+                Send invite email immediately
+              </label>
 
               <div style="margin-top:18px;">
-                <button type="submit" class="btn primary">Create Account & Send Invite</button>
+                <button type="submit" class="btn primary">Create Client Account</button>
               </div>
 
-              <p id="clientAccessMsg" class="form-response" aria-live="polite"></p>
+              <p id="createClientAccessMsg" class="form-response" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <div class="section-card">
+            <span class="eyebrow">Existing account</span>
+            <h2 class="section-title">Resend invite / reset temp password</h2>
+
+            <form id="resendClientInviteForm" style="margin-top:18px;">
+              <label for="resendLeadId">Lead ID (Optional)</label>
+              <input id="resendLeadId" name="leadId" type="number" placeholder="Example: 12" />
+
+              <label for="resendClientEmail" style="margin-top:14px;">Client Email (Optional if Lead ID provided)</label>
+              <input id="resendClientEmail" name="email" type="email" placeholder="client@example.com" />
+
+              <label for="resendClientName" style="margin-top:14px;">Client Name (Optional)</label>
+              <input id="resendClientName" name="name" type="text" placeholder="Client name" />
+
+              <label for="resendClientPassword" style="margin-top:14px;">New Temporary Password (Optional)</label>
+              <input id="resendClientPassword" name="password" type="text" placeholder="Leave blank to keep current password" />
+
+              <label style="margin-top:14px; display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input id="resendSetNewPassword" type="checkbox" />
+                Force set a new temporary password before invite
+              </label>
+
+              <div style="margin-top:18px;">
+                <button type="submit" class="btn primary">Send / Resend Invite</button>
+              </div>
+
+              <p id="resendClientInviteMsg" class="form-response" aria-live="polite"></p>
             </form>
           </div>
 
@@ -76,8 +111,8 @@
             ">
               <div class="meta" style="margin-bottom:8px;">Admin workflow</div>
               <p style="margin:0;color:var(--muted);line-height:1.8;">
-                Enter the lead ID, name, email, and a temporary password. The system will create the login
-                and email the portal invitation to the client automatically.
+                Create account: lead ID + name + email, with optional temp password generation.
+                Resend invite: use lead ID or email, and optionally set a new temporary password.
               </p>
             </div>
           </div>
@@ -87,14 +122,19 @@
   </div>
 
   <script>
-    document.getElementById("clientAccessForm").addEventListener("submit", async (event) => {
+    document.getElementById("createClientAccessForm").addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      const msg = document.getElementById("clientAccessMsg");
+      const msg = document.getElementById("createClientAccessMsg");
       msg.textContent = "";
 
       try {
-        const form = new FormData(event.target);
+        const form = new FormData();
+        form.append("leadId", document.getElementById("createLeadId").value.trim());
+        form.append("name", document.getElementById("createClientName").value.trim());
+        form.append("email", document.getElementById("createClientEmail").value.trim());
+        form.append("password", document.getElementById("createClientPassword").value);
+        form.append("sendInvite", document.getElementById("createSendInvite").checked ? "true" : "false");
 
         const createRes = await fetch("/api/client/create-account", {
           method: "POST",
@@ -108,22 +148,45 @@
           return;
         }
 
-        const inviteRes = await fetch("/api/client/send-invite", {
+        msg.textContent = createData.inviteSent
+          ? "Client account created and invite sent successfully."
+          : "Client account created successfully.";
+        event.target.reset();
+      } catch (error) {
+        msg.textContent = "Unable to complete this action right now.";
+      }
+    });
+
+    document.getElementById("resendClientInviteForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("resendClientInviteMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData();
+        form.append("leadId", document.getElementById("resendLeadId").value.trim());
+        form.append("email", document.getElementById("resendClientEmail").value.trim());
+        form.append("name", document.getElementById("resendClientName").value.trim());
+        form.append("password", document.getElementById("resendClientPassword").value);
+        form.append("setNewPassword", document.getElementById("resendSetNewPassword").checked ? "true" : "false");
+
+        const res = await fetch("/api/client/send-invite", {
           method: "POST",
           body: form
         });
 
-        const inviteData = await inviteRes.json();
+        const data = await res.json();
 
-        if (!inviteRes.ok || !inviteData.ok) {
-          msg.textContent = inviteData.error || "Account created, but invite email failed.";
+        if (!res.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to send invite.";
           return;
         }
 
-        msg.textContent = "Client account created and portal invite sent successfully.";
+        msg.textContent = "Invite email sent successfully.";
         event.target.reset();
       } catch (error) {
-        msg.textContent = "Unable to complete this action right now.";
+        msg.textContent = "Unable to send invite right now.";
       }
     });
   </script>

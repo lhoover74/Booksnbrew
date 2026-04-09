@@ -1,3 +1,5 @@
+import { getAuthenticatedClient } from "./_auth.js";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -5,18 +7,6 @@ function json(data, status = 200) {
       "Content-Type": "application/json"
     }
   });
-}
-
-function parseCookies(cookieHeader) {
-  const cookies = {};
-  (cookieHeader || "").split(";").forEach((part) => {
-    const index = part.indexOf("=");
-    if (index === -1) return;
-    const key = part.slice(0, index).trim();
-    const value = part.slice(index + 1).trim();
-    if (key) cookies[key] = value;
-  });
-  return cookies;
 }
 
 function escapeHtml(str) {
@@ -31,12 +21,12 @@ function escapeHtml(str) {
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
-    const cookies = parseCookies(request.headers.get("Cookie"));
-    const leadId = cookies.bb_client_lead_id;
-
-    if (!leadId) {
+    const account = await getAuthenticatedClient(request, env);
+    if (!account) {
       return json({ ok: false, error: "Unauthorized" }, 401);
     }
+
+    const leadId = account.lead_id;
 
     const form = await request.formData();
     const subject = (form.get("subject") || "").toString().trim();

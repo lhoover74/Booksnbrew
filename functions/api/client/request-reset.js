@@ -1,10 +1,4 @@
-async function sha256(text) {
-  const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import { sha256Hex } from "./_auth.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -42,7 +36,7 @@ export async function onRequestPost(context) {
     }
 
     const rawToken = crypto.randomUUID();
-    const hashedToken = await sha256(rawToken);
+    const hashedToken = await sha256Hex(rawToken);
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60).toISOString();
 
     await env.DB.prepare(

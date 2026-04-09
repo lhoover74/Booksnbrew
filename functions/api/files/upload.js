@@ -1,3 +1,5 @@
+import { getAuthenticatedClient } from "../client/_auth.js";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -12,18 +14,6 @@ function sanitizeFileName(name) {
     .replace(/[^\w.\- ]+/g, "")
     .replace(/\s+/g, "-")
     .slice(0, 120);
-}
-
-function parseCookies(cookieHeader) {
-  const cookies = {};
-  (cookieHeader || "").split(";").forEach((part) => {
-    const i = part.indexOf("=");
-    if (i === -1) return;
-    const key = part.slice(0, i).trim();
-    const value = part.slice(i + 1).trim();
-    if (key) cookies[key] = value;
-  });
-  return cookies;
 }
 
 export async function onRequestPost(context) {
@@ -44,8 +34,11 @@ export async function onRequestPost(context) {
     const mode = url.searchParams.get("mode") || "admin";
 
     if (mode === "client") {
-      const cookies = parseCookies(request.headers.get("Cookie"));
-      leadId = cookies.bb_client_lead_id || "";
+      const account = await getAuthenticatedClient(request, env);
+      if (!account) {
+        return json({ ok: false, error: "Unauthorized" }, 401);
+      }
+      leadId = String(account.lead_id || "");
       uploadedBy = "client";
     }
 

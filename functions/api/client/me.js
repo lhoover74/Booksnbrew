@@ -1,14 +1,4 @@
-function parseCookies(cookieHeader) {
-  const cookies = {};
-  (cookieHeader || "").split(";").forEach((part) => {
-    const index = part.indexOf("=");
-    if (index === -1) return;
-    const key = part.slice(0, index).trim();
-    const value = part.slice(index + 1).trim();
-    if (key) cookies[key] = value;
-  });
-  return cookies;
-}
+import { getAuthenticatedClient } from "./_auth.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -31,12 +21,13 @@ function normalizeInvoice(invoice) {
 export async function onRequestGet(context) {
   try {
     const { request, env } = context;
-    const cookies = parseCookies(request.headers.get("Cookie"));
-    const leadId = cookies.bb_client_lead_id;
+    const account = await getAuthenticatedClient(request, env);
 
-    if (!leadId) {
+    if (!account) {
       return json({ ok: false, error: "Unauthorized" }, 401);
     }
+
+    const leadId = account.lead_id;
 
     const lead = await env.DB.prepare(
       `SELECT * FROM leads WHERE id = ? LIMIT 1`
@@ -81,7 +72,12 @@ export async function onRequestGet(context) {
       reminders: remindersResult.results || [],
       messages: messagesResult.results || [],
       invoices: (invoicesResult.results || []).map(normalizeInvoice),
-      files: filesResult.results || []
+      files: filesResult.results || [],
+      account: {
+        id: account.id,
+        email: account.email,
+        must_change_password: Number(account.must_change_password || 0) === 1
+      }
     });
   } catch (error) {
     return json(

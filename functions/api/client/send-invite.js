@@ -7,23 +7,137 @@ function json(data, status = 200) {
   });
 }
 
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function generateTemporaryPassword(length = 12) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*";
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  let out = "";
+  for (let i = 0; i < length; i += 1) {
+    out += alphabet[bytes[i] % alphabet.length];
+  }
+  return out;
+}
+
+async function hashPassword(password) {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"]
+  );
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iterations = 120000;
+
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      hash: "SHA-256",
+      salt,
+      iterations
+    },
+    keyMaterial,
+    256
+  );
+
+  const hashBytes = new Uint8Array(bits);
+
+  function toBase64(bytes) {
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 1) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  return `pbkdf2$${iterations}$${toBase64(salt)}$${toBase64(hashBytes)}`;
+}
+
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
     const form = await request.formData();
 
+    const leadId = (form.get("leadId") || "").toString().trim();
     const email = (form.get("email") || "").toString().trim().toLowerCase();
-    const password = (form.get("password") || "").toString().trim();
-    const name = (form.get("name") || "").toString().trim();
+    const incomingPassword = (form.get("password") || "").toString().trim();
+    const nameInput = (form.get("name") || "").toString().trim();
+    const setNewPassword = (form.get("setNewPassword") || "").toString().trim().toLowerCase() === "true";
 
-    if (!email || !password || !name) {
+    if (!email && !leadId) {
       return json(
-        { ok: false, error: "Name, email, and password are required." },
+        { ok: false, error: "Lead ID or email is required." },
         400
       );
     }
 
+    let account = null;
+    if (leadId) {
+      account = await env.DB.prepare(
+        `SELECT * FROM client_accounts WHERE lead_id = ? LIMIT 1`
+      ).bind(leadId).first();
+    }
+
+    if (!account && email) {
+      account = await env.DB.prepare(
+        `SELECT * FROM client_accounts WHERE email = ? LIMIT 1`
+      ).bind(email).first();
+    }
+
+    if (!account) {
+      return json({ ok: false, error: "Client account not found." }, 404);
+    }
+
+    const lead = await env.DB.prepare(
+      `SELECT * FROM leads WHERE id = ? LIMIT 1`
+    ).bind(account.lead_id).first();
+
+    const finalName = nameInput || lead?.name || "Client";
+    const finalEmail = account.email;
+
+    let temporaryPassword = "";
+    if (setNewPassword || incomingPassword) {
+      temporaryPassword = incomingPassword || generateTemporaryPassword();
+      if (temporaryPassword.length < 8) {
+        return json({ ok: false, error: "Password must be at least 8 characters." }, 400);
+      }
+
+      const passwordHash = await hashPassword(temporaryPassword);
+      await env.DB.prepare(
+        `UPDATE client_accounts
+         SET password_hash = ?,
+             must_change_password = 1,
+             updated_at = ?
+         WHERE id = ?`
+      ).bind(passwordHash, new Date().toISOString(), account.id).run();
+    }
+
     const loginUrl = "https://booksnbrew.pages.dev/client/login.html";
+    const forgotUrl = "https://booksnbrew.pages.dev/client/forgot-password.html";
+
+    const passwordBlock = temporaryPassword
+      ? `
+          <p style="margin:0;font-size:15px;line-height:1.8;color:#4f443d;">
+            <strong>Temporary Password:</strong> ${escapeHtml(temporaryPassword)}
+          </p>
+        `
+      : `
+          <p style="margin:0;font-size:15px;line-height:1.8;color:#4f443d;">
+            <strong>Password:</strong> Use your existing password, or reset it below.
+          </p>
+          <p style="margin:8px 0 0;font-size:14px;line-height:1.7;color:#6f6258;">
+            Forgot password: <a href="${forgotUrl}" style="color:#9f6e43;">${forgotUrl}</a>
+          </p>
+        `;
 
     const html = `
       <!DOCTYPE html>
@@ -55,7 +169,7 @@ export async function onRequestPost(context) {
 
               <div style="padding:30px;">
                 <p style="margin:0 0 18px;font-size:15px;line-height:1.9;color:#524840;">
-                  Hi ${escapeHtml(name)},
+                  Hi ${escapeHtml(finalName)},
                 </p>
 
                 <p style="margin:0 0 18px;font-size:15px;line-height:1.9;color:#65584f;">
@@ -67,11 +181,9 @@ export async function onRequestPost(context) {
                     Login Details
                   </div>
                   <p style="margin:0 0 10px;font-size:15px;line-height:1.8;color:#4f443d;">
-                    <strong>Email:</strong> ${escapeHtml(email)}
+                    <strong>Email:</strong> ${escapeHtml(finalEmail)}
                   </p>
-                  <p style="margin:0;font-size:15px;line-height:1.8;color:#4f443d;">
-                    <strong>Temporary Password:</strong> ${escapeHtml(password)}
-                  </p>
+                  ${passwordBlock}
                 </div>
 
                 <div style="margin-top:24px;text-align:center;">
@@ -113,7 +225,7 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
-        to: [email],
+        to: [finalEmail],
         subject: "Your Books and Brews Client Portal Access",
         html,
         replyTo: "michael@govdirect.org"
@@ -129,7 +241,14 @@ export async function onRequestPost(context) {
       );
     }
 
-    return json({ ok: true });
+    const now = new Date().toISOString();
+    await env.DB.prepare(
+      `UPDATE client_accounts
+       SET invite_sent_at = ?, updated_at = ?
+       WHERE id = ?`
+    ).bind(now, now, account.id).run();
+
+    return json({ ok: true, inviteSentTo: finalEmail, temporaryPassword: temporaryPassword || null });
   } catch (error) {
     return json(
       {
@@ -139,13 +258,4 @@ export async function onRequestPost(context) {
       500
     );
   }
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }

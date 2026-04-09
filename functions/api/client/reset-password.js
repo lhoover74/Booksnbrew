@@ -1,10 +1,4 @@
-async function sha256(text) {
-  const data = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import { hashPassword, sha256Hex } from "./_auth.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -47,19 +41,24 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Reset link has expired." }, 400);
     }
 
-    const incomingHashedToken = await sha256(token);
+    const incomingHashedToken = await sha256Hex(token);
 
     if (incomingHashedToken !== account.reset_token) {
       return json({ ok: false, error: "Invalid reset token." }, 400);
     }
 
-    const newHash = await sha256(newPassword);
+    const newHash = await hashPassword(newPassword);
+    const now = new Date().toISOString();
 
     await env.DB.prepare(
       `UPDATE client_accounts
-       SET password_hash = ?, must_change_password = 0, reset_token = NULL, reset_token_expires_at = NULL
+        SET password_hash = ?,
+            must_change_password = 0,
+            reset_token = NULL,
+            reset_token_expires_at = NULL,
+            updated_at = ?
        WHERE id = ?`
-    ).bind(newHash, account.id).run();
+          ).bind(newHash, now, account.id).run();
 
     return json({ ok: true, message: "Password reset successfully." });
   } catch (error) {
