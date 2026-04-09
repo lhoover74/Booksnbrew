@@ -64,7 +64,7 @@ export async function onRequestPost(context) {
     const ext = safeName.includes(".") ? safeName.split(".").pop() : "";
     const key = `lead-${leadId}-${Date.now()}-${crypto.randomUUID()}${ext ? "." + ext : ""}`;
 
-    await env.ASSETS.put(key, await file.arrayBuffer(), {
+    await env.FILES_BUCKET.put(key, await file.arrayBuffer(), {
       httpMetadata: {
         contentType: file.type || "application/octet-stream"
       }
