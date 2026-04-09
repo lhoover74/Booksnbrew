@@ -18,8 +18,8 @@
           <span class="eyebrow">Admin CRM</span>
           <h1 class="page-title" style="margin-bottom:10px;">Manage Lead</h1>
           <p class="page-copy" style="max-width:760px;">
-            Review the lead, update status, manage project progress, create invoices,
-            upload assets, schedule calls, send updates, and track client communication from one dashboard.
+            Review the lead, update status, manage project progress, deliver final handoff details,
+            create invoices, upload assets, schedule calls, send updates, and track client communication.
           </p>
         </div>
       </div>
@@ -123,6 +123,36 @@
             </div>
 
             <p id="projectMsg" class="form-response" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Project completion</span>
+          <h2 class="section-title">Final handoff</h2>
+
+          <form id="completeProjectForm" style="margin-top:18px;">
+            <label for="finalMessage">Final Delivery Message</label>
+            <textarea
+              id="finalMessage"
+              name="finalMessage"
+              placeholder="Your website has been completed and delivered. Thank you for working with Books and Brews."
+              required
+            ></textarea>
+
+            <label for="maintenanceOffer" style="margin-top:14px;">Maintenance Offer</label>
+            <textarea
+              id="maintenanceOffer"
+              name="maintenanceOffer"
+              placeholder="Ongoing maintenance and support are available if needed."
+              required
+            ></textarea>
+
+            <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+              <button type="submit" class="btn primary">Mark Project Complete</button>
+              <button type="button" id="sendCompletionEmailBtn" class="btn secondary">Send Completion Email</button>
+            </div>
+
+            <p id="completeProjectMsg" class="form-response" aria-live="polite"></p>
           </form>
         </div>
 
@@ -464,6 +494,8 @@
           ? String(project.target_date).slice(0, 10)
           : "";
         document.getElementById("projectMilestone").value = project.next_milestone || "";
+        document.getElementById("finalMessage").value = project.final_message || "";
+        document.getElementById("maintenanceOffer").value = project.maintenance_offer || "";
       } catch (error) {}
     }
 
@@ -730,6 +762,68 @@
         msg.textContent = "Project tracker saved successfully.";
       } catch (error) {
         msg.textContent = "Unable to save project right now.";
+      }
+    });
+
+    document.getElementById("completeProjectForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const msg = document.getElementById("completeProjectMsg");
+      msg.textContent = "";
+
+      try {
+        const form = new FormData(event.target);
+        form.append("leadId", leadId);
+
+        const response = await fetch("/api/projects/complete", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          msg.textContent = data.error || "Unable to mark project complete.";
+          return;
+        }
+
+        await fetch("/api/projects/send-completion-email", {
+          method: "POST",
+          body: (() => {
+            const f = new FormData();
+            f.append("leadId", leadId);
+            return f;
+          })()
+        });
+
+        msg.textContent = "Project marked complete and completion email sent.";
+        await loadLead();
+        await loadProject();
+      } catch (error) {
+        msg.textContent = "Unable to complete project right now.";
+      }
+    });
+
+    document.getElementById("sendCompletionEmailBtn").addEventListener("click", async () => {
+      try {
+        const form = new FormData();
+        form.append("leadId", leadId);
+
+        const response = await fetch("/api/projects/send-completion-email", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          alert(data.error || "Unable to send completion email.");
+          return;
+        }
+
+        alert("Completion email sent.");
+      } catch (error) {
+        alert("Unable to send completion email right now.");
       }
     });
 
