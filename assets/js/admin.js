@@ -66,10 +66,7 @@ function getStatusTag(status) {
 }
 
 function autoTag(lead) {
-  if (lead?.budget_range && lead.budget_range.includes("5000")) {
-    return "🔥 High Value";
-  }
-  if (lead?.budget_range && lead.budget_range.includes("$5,000")) {
+  if (lead?.budget_range && (lead.budget_range.includes("600") || lead.budget_range.includes("$600"))) {
     return "🔥 High Value";
   }
   if (lead?.project_type) {

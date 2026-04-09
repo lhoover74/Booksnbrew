@@ -183,4 +183,95 @@ textarea { resize: vertical; min-height: 160px; }
   .four-up, .three-up { grid-template-columns: 1fr; }
   .cta-band, .footer { flex-direction: column; }
   .button { width: 100%; }
+  .pricing-cta { width: 100%; }
+  .addon-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ─── Pricing Cards ─── */
+.pricing-grid { align-items: stretch; }
+.pricing-card {
+  display: flex; flex-direction: column; text-align: center; padding: 32px 24px;
+}
+.pricing-popular {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+  position: relative;
+}
+.popular-badge {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(180deg, #d3a16a, #b87f47); color: #23150f;
+  font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 18px; border-radius: 20px; white-space: nowrap;
+}
+.pricing-label {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600;
+  margin: 0 0 6px; color: var(--text);
+}
+.pricing-amount {
+  font-size: 3.2rem; font-weight: 800; margin: 0 0 10px; color: var(--accent);
+  line-height: 1;
+}
+.pricing-desc { color: var(--muted); font-size: .95rem; line-height: 1.6; margin: 0 0 18px; }
+.pricing-features {
+  list-style: none; padding: 0; margin: 0 0 18px; text-align: left;
+}
+.pricing-features li {
+  padding: 7px 0; border-bottom: 1px solid var(--line);
+  color: var(--muted); font-size: .95rem;
+}
+.pricing-features li:last-child { border-bottom: none; }
+.pricing-features li::before {
+  content: "✓"; color: var(--accent); font-weight: 700; margin-right: 10px;
+}
+.pricing-best {
+  font-size: .88rem; color: var(--muted); margin: 0 0 18px; text-align: left;
+}
+.pricing-payment {
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: .82rem; color: var(--accent); font-weight: 600;
+  margin: 0 0 20px; padding: 10px 14px;
+  background: rgba(199,144,88,.08); border-radius: 10px;
+}
+.pricing-cta { margin-top: auto; }
+
+/* ─── Add-ons ─── */
+.addon-grid {
+  grid-template-columns: repeat(5, 1fr);
+}
+.addon-card {
+  text-align: center; padding: 22px 16px;
+}
+.addon-card h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.35rem;
+  margin: 0 0 10px;
+}
+.addon-price {
+  font-size: 1.5rem; font-weight: 800; color: var(--accent); margin: 0;
+}
+.addon-price span { font-size: .85rem; font-weight: 500; color: var(--muted); }
+
+/* ─── Process Steps ─── */
+.process-step { text-align: center; }
+.step-number {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(180deg, #d3a16a, #b87f47); color: #23150f;
+  font-size: 1.1rem; font-weight: 800; margin-bottom: 14px;
+}
+
+/* ─── Card Price Tag (Home) ─── */
+.card-price-tag {
+  font-size: 1.4rem; font-weight: 800; color: var(--accent); margin: 4px 0 10px;
+}
+
+/* ─── CTA Actions ─── */
+.cta-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+@media (max-width: 1080px) {
+  .addon-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 780px) {
+  .addon-grid { grid-template-columns: repeat(2, 1fr); }
+  .cta-actions { flex-direction: column; }
+  .cta-actions .button { width: 100%; }
 }
