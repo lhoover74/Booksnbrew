@@ -362,6 +362,16 @@
           return;
         }
 
+        const notifyForm = new FormData();
+        notifyForm.append("leadId", data.file?.lead_id || "");
+        notifyForm.append("fileName", data.file?.file_name || "New file");
+        notifyForm.append("uploadedBy", "client");
+
+        await fetch("/api/files/notify-upload", {
+          method: "POST",
+          body: notifyForm
+        });
+
         msg.textContent = "File uploaded successfully.";
         event.target.reset();
         await loadPortal();
