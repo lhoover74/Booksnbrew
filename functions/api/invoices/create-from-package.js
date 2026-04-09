@@ -9,45 +9,62 @@ export async function onRequestPost({ request, env }) {
   try {
     const form = await request.formData();
 
-    const leadId = form.get("leadId");
-    const packageId = form.get("packageId");
+    const leadId = (form.get("leadId") || "").toString().trim();
+    const packageId = (form.get("packageId") || "").toString().trim();
 
     if (!leadId || !packageId) {
-      return json({ ok: false, error: "Missing data" }, 400);
+      return json({ ok: false, error: "Missing data." }, 400);
     }
 
     const pkg = await env.DB.prepare(
-      "SELECT * FROM service_packages WHERE id = ?"
+      `SELECT * FROM service_packages WHERE id = ? LIMIT 1`
     ).bind(packageId).first();
 
     if (!pkg) {
-      return json({ ok: false, error: "Package not found" }, 404);
+      return json({ ok: false, error: "Package not found." }, 404);
     }
 
-    const amount = pkg.price;
-    const deposit = pkg.deposit_percent > 0
-      ? (amount * pkg.deposit_percent) / 100
-      : amount;
+    const amount = Number(pkg.price || 0);
+    const depositPercent = Number(pkg.deposit_percent || 0);
+    const depositAmount =
+      depositPercent > 0 ? Number(((amount * depositPercent) / 100).toFixed(2)) : amount;
 
-    const invoiceNumber = "INV-" + Date.now();
+    const now = new Date().toISOString();
+    const invoiceNumber = `INV-${Date.now()}`;
 
     await env.DB.prepare(`
-      INSERT INTO invoices (lead_id, invoice_number, amount, status, notes, created_at)
-      VALUES (?, ?, ?, 'Draft', ?, ?)
+      INSERT INTO invoices (
+        lead_id,
+        invoice_number,
+        amount,
+        status,
+        notes,
+        created_at,
+        updated_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).bind(
       leadId,
       invoiceNumber,
-      deposit,
-      pkg.description,
-      new Date().toISOString()
+      depositAmount,
+      "Draft",
+      pkg.description || pkg.name || "Package invoice",
+      now,
+      now
     ).run();
 
     return json({
       ok: true,
-      message: "Invoice created from package"
+      message: "Invoice created from package.",
+      invoice: {
+        invoice_number: invoiceNumber,
+        amount: depositAmount
+      }
     });
-
   } catch (e) {
-    return json({ ok: false, error: e.message }, 500);
+    return json(
+      { ok: false, error: e instanceof Error ? e.message : "Failed to create invoice." },
+      500
+    );
   }
 }
