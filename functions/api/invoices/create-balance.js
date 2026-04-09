@@ -14,53 +14,26 @@ function createInvoiceNumber() {
   return `INV-${Date.now()}-B${random}`;
 }
 
-function packageLabel(invoice) {
-  const text = (invoice.notes || "").trim();
-  if (!text) {
-    return "project";
-  }
-
-  if (text.toLowerCase().startsWith("deposit invoice for ")) {
-    return text.slice("deposit invoice for ".length).trim() || "project";
-  }
-
-  return text;
-}
-
 export async function onRequestPost({ request, env }) {
   try {
     const form = await request.formData();
-    const depositInvoiceId = (form.get("depositInvoiceId") || "").toString().trim();
-    const leadId = (form.get("leadId") || "").toString().trim();
+    const invoiceId = (form.get("invoiceId") || "").toString().trim();
 
-    if (!depositInvoiceId && !leadId) {
-      return json({ ok: false, error: "depositInvoiceId or leadId is required." }, 400);
+    if (!invoiceId) {
+      return json({ ok: false, error: "invoiceId is required." }, 400);
     }
 
-    let depositInvoice = null;
-
-    if (depositInvoiceId) {
-      depositInvoice = await env.DB.prepare(
-        `SELECT * FROM invoices WHERE id = ? LIMIT 1`
-      ).bind(depositInvoiceId).first();
-    } else {
-      depositInvoice = await env.DB.prepare(
-        `SELECT *
-         FROM invoices
-         WHERE lead_id = ?
-           AND invoice_type = 'deposit'
-         ORDER BY created_at DESC, id DESC
-         LIMIT 1`
-      ).bind(leadId).first();
-    }
+    const depositInvoice = await env.DB.prepare(
+      `SELECT * FROM invoices WHERE id = ? LIMIT 1`
+    ).bind(invoiceId).first();
 
     if (!depositInvoice) {
-      return json({ ok: false, error: "Deposit invoice not found." }, 404);
+      return json({ ok: false, error: "Invoice not found." }, 404);
     }
 
     const invoiceType = (depositInvoice.invoice_type || "full").toLowerCase();
     if (invoiceType !== "deposit") {
-      return json({ ok: false, error: "Balance invoices can only be created from a deposit invoice." }, 400);
+      return json({ ok: false, error: "Only deposit invoices can create a remaining balance invoice." }, 400);
     }
 
     if ((depositInvoice.status || "").toLowerCase() !== "paid") {
@@ -93,21 +66,18 @@ export async function onRequestPost({ request, env }) {
           OR (
             lead_id = ?
             AND invoice_type = 'balance'
-            AND ABS(COALESCE(total_project_amount, 0) - ?) < 0.01
           )
        LIMIT 1`
     ).bind(
       depositInvoice.id,
-      depositInvoice.lead_id,
-      totalProjectAmount
+      depositInvoice.lead_id
     ).first();
 
     if (existingBalance) {
       return json({ ok: false, error: "A remaining balance invoice already exists for this project." }, 409);
     }
 
-    const packageName = packageLabel(depositInvoice);
-    const note = `Remaining balance for ${packageName}`;
+    const note = "Remaining balance for project";
     const invoiceNumber = createInvoiceNumber();
     const now = new Date().toISOString();
 

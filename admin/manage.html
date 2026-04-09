@@ -604,10 +604,14 @@
 
     async function loadInvoices() {
       const list = document.getElementById("invoiceList");
+      const invoiceMsg = document.getElementById("invoiceMsg");
 
       try {
         const response = await fetchJson(`/api/invoices/by-lead?leadId=${leadId}`);
         const invoices = response.invoices || [];
+        const hasAnyBalanceInvoice = invoices.some(
+          (item) => normalizeInvoiceType(item.invoice_type) === "balance"
+        );
         const existingBalanceByParent = new Set(
           invoices
             .filter((item) => normalizeInvoiceType(item.invoice_type) === "balance" && item.parent_invoice_id)
@@ -641,7 +645,7 @@
                       Generate Stripe Payment Link
                     </button>
                   `}
-                  ${normalizeInvoiceType(item.invoice_type) === "deposit" && String(item.status || "").toLowerCase() === "paid" && Number(item.balance_due_amount || 0) > 0 && !existingBalanceByParent.has(String(item.id)) ? `
+                  ${normalizeInvoiceType(item.invoice_type) === "deposit" && String(item.status || "").toLowerCase() === "paid" && Number(item.balance_due_amount || 0) > 0 && !hasAnyBalanceInvoice && !existingBalanceByParent.has(String(item.id)) ? `
                     <button class="btn secondary" type="button" onclick="createBalanceInvoice('${item.id}')">
                       Create Remaining Balance Invoice
                     </button>
@@ -650,6 +654,10 @@
               </div>
             `).join("")
           : `<div class="contact-detail" style="display:block;">No invoices yet.</div>`;
+
+        if (invoiceMsg) {
+          invoiceMsg.textContent = invoiceMsg.textContent || "";
+        }
       } catch (error) {
         list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load invoices.</div>`;
       }
@@ -715,10 +723,13 @@
       }
     }
 
-    async function createBalanceInvoice(depositInvoiceId) {
+    async function createBalanceInvoice(invoiceId) {
+      const msg = document.getElementById("invoiceMsg");
+      if (msg) msg.textContent = "";
+
       try {
         const form = new FormData();
-        form.append("depositInvoiceId", depositInvoiceId);
+        form.append("invoiceId", invoiceId);
 
         const response = await fetch("/api/invoices/create-balance", {
           method: "POST",
@@ -727,14 +738,20 @@
 
         const data = await response.json();
         if (!response.ok || !data.ok) {
-          alert(data.error || "Unable to create remaining balance invoice.");
+          if (msg) {
+            msg.textContent = data.error || "Unable to create remaining balance invoice.";
+          }
           return;
         }
 
         await loadInvoices();
-        alert("Remaining balance invoice created.");
+        if (msg) {
+          msg.textContent = "Remaining balance invoice created successfully.";
+        }
       } catch (error) {
-        alert("Unable to create remaining balance invoice right now.");
+        if (msg) {
+          msg.textContent = "Unable to create remaining balance invoice right now.";
+        }
       }
     }
 
