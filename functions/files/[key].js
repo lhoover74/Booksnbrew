@@ -7,7 +7,7 @@ export async function onRequestGet(context) {
     return new Response("Missing file key", { status: 400 });
   }
 
-  const object = await env.ASSETS.get(key);
+  const object = await env.FILES_BUCKET.get(key);
 
   if (!object) {
     return new Response("File not found", { status: 404 });
