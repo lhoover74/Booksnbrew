@@ -52,6 +52,12 @@
         </div>
 
         <div class="section-card" style="margin-top:22px;">
+          <span class="eyebrow">Project completion</span>
+          <h2 class="section-title">Final delivery</h2>
+          <div id="portalCompletion" style="display:grid; gap:12px; margin-top:16px;"></div>
+        </div>
+
+        <div class="section-card" style="margin-top:22px;">
           <span class="eyebrow">Invoices</span>
           <h2 class="section-title">Billing</h2>
           <div id="portalInvoices" style="display:grid; gap:12px; margin-top:16px;"></div>
@@ -261,6 +267,23 @@
             </div>
           `
           : `<div class="contact-detail" style="display:block;">No project tracker has been published yet.</div>`;
+
+        document.getElementById("portalCompletion").innerHTML = project && project.stage === "Complete"
+          ? `
+            <div class="contact-detail" style="display:block;">
+              <div style="font-size:12px; color:var(--accent); margin-bottom:8px;">
+                Project Complete • ${escapeHtml(formatDate(project.completed_at))}
+              </div>
+              <div style="line-height:1.8; margin-bottom:14px;">
+                ${escapeHtml(project.final_message || "Your project has been completed and delivered.").replace(/\n/g, "<br>")}
+              </div>
+              <div style="padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.02);">
+                <div class="meta" style="margin-bottom:6px;">Ongoing Support</div>
+                <div>${escapeHtml(project.maintenance_offer || "Ongoing maintenance and support are available if needed.").replace(/\n/g, "<br>")}</div>
+              </div>
+            </div>
+          `
+          : `<div class="contact-detail" style="display:block;">Your final delivery details will appear here when your project is complete.</div>`;
 
         document.getElementById("portalInvoices").innerHTML =
           invoices.length
