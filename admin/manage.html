@@ -577,12 +577,42 @@
                 <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">
                   ${escapeHtml(item.file_type || "file")} • ${escapeHtml(formatDate(item.created_at))}
                 </div>
-                <a class="btn secondary" href="${escapeHtml(item.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <a class="btn secondary" href="${escapeHtml(item.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>
+                  <button class="btn secondary" type="button" onclick="deleteFile('${item.id}')">Delete File</button>
+                </div>
               </div>
             `).join("")
           : `<div class="contact-detail" style="display:block;">No files uploaded yet.</div>`;
       } catch (error) {
         list.innerHTML = `<div class="contact-detail" style="display:block;">Unable to load files.</div>`;
+      }
+    }
+
+    async function deleteFile(fileId) {
+      const ok = confirm("Delete this file?");
+      if (!ok) return;
+
+      try {
+        const form = new FormData();
+        form.append("fileId", fileId);
+
+        const response = await fetch("/api/files/delete", {
+          method: "POST",
+          body: form
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.ok) {
+          alert(data.error || "Unable to delete file.");
+          return;
+        }
+
+        await loadFiles();
+        alert("File deleted successfully.");
+      } catch (error) {
+        alert("Unable to delete file right now.");
       }
     }
 
@@ -755,6 +785,16 @@
           msg.textContent = data.error || "Unable to upload file.";
           return;
         }
+
+        const notifyForm = new FormData();
+        notifyForm.append("leadId", leadId);
+        notifyForm.append("fileName", data.file?.file_name || "New file");
+        notifyForm.append("uploadedBy", "admin");
+
+        await fetch("/api/files/notify-upload", {
+          method: "POST",
+          body: notifyForm
+        });
 
         msg.textContent = "File uploaded successfully.";
         event.target.reset();
