@@ -275,3 +275,76 @@ textarea { resize: vertical; min-height: 160px; }
   .cta-actions { flex-direction: column; }
   .cta-actions .button { width: 100%; }
 }
+
+/* ─── Six-up grid ─── */
+.six-up { grid-template-columns: repeat(3, 1fr); }
+
+/* ─── Niche Tags ─── */
+.niche-tags {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; justify-content: center;
+}
+.niche-tags span {
+  padding: 9px 20px; border: 1px solid var(--line-strong);
+  border-radius: 999px; font-size: .86rem; color: var(--muted);
+  background: rgba(22,15,13,.48); letter-spacing: .04em;
+}
+
+/* ─── Intro Bullets ─── */
+.intro-bullets {
+  list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 10px;
+}
+.intro-bullets li {
+  color: var(--muted); line-height: 1.7; padding-left: 24px; position: relative;
+}
+.intro-bullets li::before { content: "✓"; color: var(--accent); font-weight: 700; position: absolute; left: 0; }
+
+/* ─── Quote Page Layout ─── */
+.quote-split {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: start;
+}
+.form-block { display: grid; gap: 20px; }
+.form-block label { display: block; font-weight: 600; margin-bottom: 8px; font-size: .93rem; }
+.form-full { grid-column: 1 / -1; }
+.form-response {
+  display: block; margin-top: 14px; color: var(--accent); font-size: .9rem; min-height: 20px;
+}
+.process-guide { display: grid; gap: 24px; margin-top: 24px; }
+.process-guide-item { display: flex; gap: 16px; align-items: flex-start; }
+.process-guide-item .badge {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(180deg, #d3a16a, #b87f47); color: #23150f;
+  font-size: 1rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.process-guide-item div strong { display: block; margin-bottom: 4px; }
+.process-guide-item div span { color: var(--muted); font-size: .9rem; line-height: 1.65; display: block; }
+
+/* ─── Portfolio Page ─── */
+.portfolio-page-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+.portfolio-card {
+  overflow: hidden; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(38,25,22,.74), rgba(22,16,14,.78));
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.portfolio-card img { aspect-ratio: 4/3; width: 100%; object-fit: cover; }
+.portfolio-card-info { padding: 22px; }
+.portfolio-card-info .chip { margin-bottom: 6px; }
+.portfolio-card-info h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.65rem; margin: 0 0 8px; }
+.portfolio-card-info p { color: var(--muted); line-height: 1.65; margin: 0 0 10px; font-size: .92rem; }
+.portfolio-card-info .for-label {
+  font-size: .78rem; color: var(--accent); font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+/* ─── Responsive additions ─── */
+@media (max-width: 1080px) {
+  .six-up { grid-template-columns: repeat(2, 1fr); }
+  .quote-split { grid-template-columns: 1fr; }
+  .portfolio-page-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 780px) {
+  .six-up { grid-template-columns: 1fr; }
+  .portfolio-page-grid { grid-template-columns: 1fr; }
+  .niche-tags { justify-content: flex-start; }
+}
