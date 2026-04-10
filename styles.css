@@ -348,3 +348,99 @@ textarea { resize: vertical; min-height: 160px; }
   .portfolio-page-grid { grid-template-columns: 1fr; }
   .niche-tags { justify-content: flex-start; }
 }
+
+/* ─── Featured Portfolio Cards (Homepage + Portfolio Page) ─── */
+.port-feat-card {
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(38,25,22,.74), rgba(22,16,14,.78));
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.port-thumb {
+  aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.port-thumb-hair {
+  background: linear-gradient(135deg, #2a1320 0%, #4a1a2e 40%, #3a1020 100%);
+}
+.port-thumb-barber {
+  background: linear-gradient(135deg, #0c1219 0%, #162030 40%, #0e1922 100%);
+}
+.port-thumb-beauty {
+  background: linear-gradient(135deg, #281420 0%, #4a1c30 40%, #321425 100%);
+}
+.port-thumb::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+.port-thumb-content {
+  text-align: center; position: relative; z-index: 1; padding: 20px;
+}
+.port-thumb-icon {
+  display: block; font-size: 2.6rem; margin-bottom: 12px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.5));
+}
+.port-thumb-name {
+  display: block; font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-weight: 600; color: rgba(255,255,255,.9);
+  text-shadow: 0 2px 14px rgba(0,0,0,.6); letter-spacing: .04em;
+}
+.port-thumb-tagline {
+  display: block; font-size: .8rem; color: rgba(255,255,255,.5);
+  margin-top: 6px; letter-spacing: .08em;
+}
+.port-feat-body {
+  padding: 24px; display: flex; flex-direction: column; flex: 1;
+}
+.port-feat-body h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; margin: 4px 0 8px; color: var(--text);
+}
+.port-feat-body .port-desc {
+  color: var(--muted); font-size: .93rem; line-height: 1.7; margin: 0 0 16px;
+}
+.port-feat-features {
+  list-style: none; padding: 0; margin: 0 0 22px; display: grid; gap: 8px;
+}
+.port-feat-features li {
+  color: var(--muted); font-size: .88rem; padding-left: 22px; position: relative; line-height: 1.5;
+}
+.port-feat-features li::before {
+  content: "✓"; color: var(--accent); position: absolute; left: 0; font-weight: 700;
+}
+.port-feat-cta { margin-top: auto; text-align: center; }
+
+/* ─── Portfolio Page expanded cards ─── */
+.port-page-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+}
+.port-page-card {
+  display: flex; flex-direction: column; overflow: hidden; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(38,25,22,.74), rgba(22,16,14,.78));
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+.port-page-card .port-thumb { aspect-ratio: 16/9; }
+.port-page-body { padding: 26px; display: flex; flex-direction: column; flex: 1; }
+.port-page-body h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; margin: 4px 0 10px; }
+.port-page-body .port-desc { color: var(--muted); line-height: 1.75; margin: 0 0 18px; font-size: .95rem; }
+.port-page-features {
+  list-style: none; padding: 0; margin: 0 0 20px; display: grid; gap: 9px;
+  border-top: 1px solid var(--line); padding-top: 16px;
+}
+.port-page-features li {
+  color: var(--muted); font-size: .9rem; padding-left: 22px; position: relative;
+}
+.port-page-features li::before { content: "✓"; color: var(--accent); position: absolute; left: 0; font-weight: 700; }
+.port-page-cta { margin-top: auto; }
+.port-for-label {
+  display: inline-block; margin-bottom: 8px;
+  font-size: .76rem; letter-spacing: .14em; color: var(--accent);
+  font-weight: 700; text-transform: uppercase;
+}
+
+@media (max-width: 1080px) {
+  .port-page-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 780px) {
+  .port-page-grid { grid-template-columns: 1fr; }
+  .port-feat-cta, .port-page-cta { width: 100%; }
+}
