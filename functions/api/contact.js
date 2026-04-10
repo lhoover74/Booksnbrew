@@ -86,7 +86,7 @@ export async function onRequestPost(context) {
     // Set RESEND_FROM_EMAIL and ADMIN_EMAIL in Cloudflare Pages →
     // Settings → Environment Variables (see README).
     const fromEmail  = env.RESEND_FROM_EMAIL || "quotes@booksnbrew.govdirect.org";
-    const adminEmail = env.ADMIN_EMAIL       || "michael@govdirect.org";
+    const adminEmail = env.ADMIN_NOTIFY_EMAIL || env.ADMIN_EMAIL || "michael@govdirect.org";
 
     // ── Admin notification (always sent, even for spam) ───────────
     const spamPrefix = isSpam ? "🚫 [SPAM] " : "";
