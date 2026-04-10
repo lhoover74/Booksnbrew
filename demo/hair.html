@@ -3,141 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Luxury Braids Studio | Premium Braiding Services</title>
-  <meta name="description" content="Luxury Braids Studio — premium braiding, locs, and protective styles. Book your appointment today." />
+  <title>Luxury Braids Studio | Premium Braiding &amp; Styling</title>
+  <meta name="description" content="Luxury Braids Studio — premium knotless braids, locs, cornrows, and protective styles crafted with precision and care. Book your appointment." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="demo.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="hair.css" />
 </head>
-<body data-theme="hair">
+<body>
 
   <!-- Nav -->
-  <nav class="d-nav">
-    <div class="d-container">
+  <nav class="h-nav">
+    <div class="wrap">
       <div class="inner">
-        <a class="d-logo" href="#top">Luxury Braids</a>
-        <div class="d-nav-links">
+        <a class="h-logo" href="#top">Luxury Braids Studio</a>
+        <nav class="h-nav-links">
           <a href="#services">Services</a>
-          <a href="#about">About</a>
-          <a href="#booking">Book Now</a>
-        </div>
-        <a class="d-nav-cta" href="#booking">Book Appointment</a>
-        <button class="d-menu-toggle" aria-label="Open menu" onclick="document.getElementById('dmobile').classList.toggle('open')">☰</button>
+          <a href="#why">About</a>
+          <a href="#booking">Book</a>
+        </nav>
+        <a class="h-nav-book" href="#booking">Book Appointment</a>
+        <button class="h-mtoggle" aria-label="Open menu" onclick="document.getElementById('hmnav').classList.toggle('open')">☰</button>
       </div>
     </div>
-    <div class="d-mobile-nav" id="dmobile">
+    <div class="h-mnav" id="hmnav">
       <a href="#services">Services</a>
-      <a href="#about">About</a>
-      <a class="d-btn-primary" href="#booking">Book Appointment</a>
+      <a href="#why">About</a>
+      <a href="#booking">Book</a>
+      <a class="h-btn h-btn-fill" href="#booking">Book Appointment</a>
     </div>
   </nav>
 
-  <!-- Hero -->
-  <section class="d-hero" id="top">
-    <div class="d-hero-bg"></div>
-    <div class="d-container">
-      <div class="d-hero-content">
-        <span class="d-eyebrow">Luxury Braiding Services</span>
-        <div class="d-hero-accent-line"></div>
-        <h1>Luxury braiding services with a flawless finish.</h1>
-        <p>From knotless braids to intricate locs, every style is crafted with precision, care, and a love for the art. Walk in looking great. Leave feeling flawless.</p>
-        <div class="d-hero-actions">
-          <a class="d-btn-primary" href="#booking">Book an Appointment</a>
-          <a class="d-btn-ghost" href="#services">View Services</a>
+  <!-- Hero — split layout: text left, art panel right -->
+  <section class="h-hero" id="top">
+    <div class="wrap" style="display:contents;">
+      <div class="h-hero-left">
+        <div class="wrap" style="display:block; width:100%;">
+          <span class="h-eyebrow">Premium Braiding Studio</span>
+          <h1>
+            Protective styles.<br />
+            <em>Flawless</em> finish.
+          </h1>
+          <p>Every braid, every strand — installed with intention. Luxury Braids Studio specializes in styles that honor the health of your hair while letting your beauty speak for itself.</p>
+          <div class="h-hero-btns">
+            <a class="h-btn h-btn-fill" href="#booking">Book an Appointment</a>
+            <a class="h-btn h-btn-line" href="#services">View Services</a>
+          </div>
+        </div>
+      </div>
+      <div class="h-hero-right" aria-hidden="true">
+        <div class="h-art-rings">
+          <div class="h-ring-outer">
+            <div class="h-ring-inner">
+              <div class="h-ring-text">Luxury<br />Braids<br />Studio</div>
+            </div>
+          </div>
+          <div class="h-art-label">Est. 2019 &nbsp;·&nbsp; <strong>Premium &amp; Protective</strong></div>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="d-divider" />
+  <div class="wrap"><hr class="h-divider" /></div>
 
   <!-- Services -->
-  <section class="d-section" id="services">
-    <div class="d-container">
-      <span class="d-section-eyebrow">What We Offer</span>
-      <h2>Our Services</h2>
-      <p class="d-section-sub">Clean, precise, and crafted to last. Every service is done with care from start to finish.</p>
-      <div class="d-services-grid">
-        <div class="d-service-card">
-          <span class="d-service-icon">🪢</span>
-          <h3>Knotless Box Braids</h3>
-          <p>Lightweight, natural-looking braids installed without the tension of traditional methods. Protective and long-lasting.</p>
-          <p class="d-service-price">From $150</p>
+  <section class="h-section" id="services">
+    <div class="wrap">
+      <span class="h-label">What We Offer</span>
+      <h2>Services</h2>
+      <p class="h-sub">Every style is crafted to protect your natural hair while keeping you looking flawless from install to takedown.</p>
+      <div class="h-menu">
+        <div class="h-menu-row">
+          <span class="h-menu-num">01</span>
+          <div class="h-menu-body">
+            <h3>Knotless Box Braids</h3>
+            <p>Lightweight, tension-free braids installed from the root using a feed-in technique. Natural-looking, scalp-friendly, and long-lasting.</p>
+          </div>
+          <span class="h-menu-price">From $150</span>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">✂️</span>
-          <h3>Cornrows</h3>
-          <p>Classic flat cornrows in straight or curved patterns, installed neat and styled for everyday or special occasions.</p>
-          <p class="d-service-price">From $75</p>
+        <div class="h-menu-row">
+          <span class="h-menu-num">02</span>
+          <div class="h-menu-body">
+            <h3>Cornrows</h3>
+            <p>Classic flat braids in straight, curved, or custom patterns. Crisp, clean, and styled to hold for weeks. Great for any occasion.</p>
+          </div>
+          <span class="h-menu-price">From $75</span>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">🌿</span>
-          <h3>Locs Starter Set</h3>
-          <p>New to locs? We'll start your journey right — clean, even sections, properly maintained from day one.</p>
-          <p class="d-service-price">From $120</p>
+        <div class="h-menu-row">
+          <span class="h-menu-num">03</span>
+          <div class="h-menu-body">
+            <h3>Goddess &amp; Boho Braids</h3>
+            <p>Full, flowing braids with a soft, romantic finish. Curls left out at the ends or throughout for a natural, elevated look.</p>
+          </div>
+          <span class="h-menu-price">From $180</span>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">✨</span>
-          <h3>Goddess Braids</h3>
-          <p>Full, flowing braids with a regal finish. Perfect for events, photos, or just treating yourself to something elevated.</p>
-          <p class="d-service-price">From $180</p>
+        <div class="h-menu-row">
+          <span class="h-menu-num">04</span>
+          <div class="h-menu-body">
+            <h3>Locs Starter &amp; Retwist</h3>
+            <p>New to locs? Professional starter locs, palm rolls, and retwist services — done with clean sections and long-term health in mind.</p>
+          </div>
+          <span class="h-menu-price">From $120</span>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">🧴</span>
-          <h3>Scalp Treatment</h3>
-          <p>Nourishing scalp care added to any service — cleans buildup, promotes growth, and keeps your hair healthy.</p>
-          <p class="d-service-price">+$30</p>
+        <div class="h-menu-row">
+          <span class="h-menu-num">05</span>
+          <div class="h-menu-body">
+            <h3>Kids Braids (Under 10)</h3>
+            <p>Patient, gentle braiding for little ones. Done comfortably and styled to be durable, neat, and age-appropriate.</p>
+          </div>
+          <span class="h-menu-price">From $60</span>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">🌸</span>
-          <h3>Kids Braids</h3>
-          <p>Gentle braiding services for little ones — done patiently and styled to be comfortable, cute, and long-lasting.</p>
-          <p class="d-service-price">From $60</p>
+        <div class="h-menu-row">
+          <span class="h-menu-num">06</span>
+          <div class="h-menu-body">
+            <h3>Scalp Treatment Add-on</h3>
+            <p>Deep-cleansing scalp care added to any braiding service. Removes buildup, soothes the scalp, and promotes healthy growth.</p>
+          </div>
+          <span class="h-menu-price">+$30</span>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="d-divider" />
+  <div class="wrap"><hr class="h-divider" /></div>
 
-  <!-- About -->
-  <section class="d-section" id="about">
-    <div class="d-container">
-      <div style="max-width: 700px;">
-        <span class="d-section-eyebrow">About the Studio</span>
-        <h2>Crafted with intention.</h2>
-        <p style="color:var(--demo-muted); line-height:1.8; font-size:1.05rem; margin:14px 0 0;">Luxury Braids Studio was built around one belief: every client deserves a premium experience. Whether it's your first set of braids or your tenth, you're getting skilled hands, clean products, and a space that feels as good as your final result. We specialize in protective styles that honor the health of your hair — not just the look of it.</p>
+  <!-- Why / Features -->
+  <section class="h-why" id="why">
+    <div class="wrap">
+      <span class="h-label">Why Clients Book Here</span>
+      <p class="h-pullquote">"I've had braids done a dozen places. This is the only studio where I left feeling like the appointment was designed around me."</p>
+      <p class="h-pullquote-attr">— Client since 2021</p>
+      <div class="h-why-grid">
+        <div class="h-why-card">
+          <span class="h-why-icon">🌿</span>
+          <h3>Protective First</h3>
+          <p>Every style is selected and installed with the long-term health of your natural hair in mind — not just how it looks on install day.</p>
+        </div>
+        <div class="h-why-card">
+          <span class="h-why-icon">✨</span>
+          <h3>Precision Craftsmanship</h3>
+          <p>Clean parts, consistent tension, and a finish that holds. Every detail matters — and it shows in every appointment.</p>
+        </div>
+        <div class="h-why-card">
+          <span class="h-why-icon">🎀</span>
+          <h3>Premium Experience</h3>
+          <p>From booking to finish, every part of your visit is calm, intentional, and elevated. You leave looking great and feeling taken care of.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <hr class="d-divider" />
+  <div class="wrap"><hr class="h-divider" /></div>
 
   <!-- Booking CTA -->
-  <section class="d-cta-band" id="booking">
-    <div class="d-container">
-      <span class="d-section-eyebrow">Ready to Book?</span>
-      <h2>Let's get you booked in.</h2>
-      <p>Fill out the form below or reach out directly via text or DM. Appointments are typically available within 3–5 days. New clients welcome.</p>
-      <div class="d-cta-actions">
-        <a class="d-btn-primary" href="mailto:hello@luxurybraids.example">Contact to Book</a>
-        <a class="d-btn-ghost" href="tel:+15550001111">Call or Text: (555) 000-1111</a>
+  <section class="h-cta" id="booking">
+    <div class="wrap">
+      <span class="h-label">Ready to Book?</span>
+      <h2>Let's craft your next look.</h2>
+      <p>New and returning clients welcome. Reach out via text, email, or DM to schedule. Appointments typically available within 3–5 days.</p>
+      <div class="h-cta-btns">
+        <a class="h-btn h-btn-fill" href="mailto:hello@luxurybraids.example">Request an Appointment</a>
+        <a class="h-btn h-btn-line" href="tel:+15550001111">Call or Text: (555) 000-1111</a>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="d-footer">
-    <div class="d-container">
-      <div class="d-footer-inner">
+  <footer class="h-footer">
+    <div class="wrap">
+      <div class="h-footer-in">
         <div>
-          <div class="d-footer-logo">Luxury Braids Studio</div>
-          <div class="d-footer-tagline">Precision braiding. Premium finish. Every time.</div>
+          <div class="h-footer-logo">Luxury Braids Studio</div>
+          <div class="h-footer-sub">Protective styles. Flawless finish. Every time.</div>
         </div>
-        <div class="d-footer-credit">
+        <div class="h-footer-credit">
           Website by <a href="../index.html">Books and Brews</a><br>
-          <span style="font-size:.75rem; opacity:.6;">This is a demo site — <a href="../portfolio.html">view portfolio</a></span>
+          <span style="font-size:.75rem; opacity:.65;">Demo site — <a href="../portfolio.html">view portfolio</a></span>
         </div>
       </div>
     </div>

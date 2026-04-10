@@ -4,141 +4,187 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Glow Beauty Bar | Enhancing Your Natural Beauty</title>
-  <meta name="description" content="Glow Beauty Bar — facials, lash services, brow shaping, and skincare treatments designed to enhance your natural beauty. Book your appointment today." />
+  <meta name="description" content="Glow Beauty Bar — premium facials, lash lifts, brow treatments, and skincare designed to enhance your natural beauty. Book your appointment today." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="demo.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="beauty.css" />
 </head>
-<body data-theme="beauty">
+<body>
 
   <!-- Nav -->
-  <nav class="d-nav">
-    <div class="d-container">
+  <nav class="g-nav">
+    <div class="wrap">
       <div class="inner">
-        <a class="d-logo" href="#top">Glow Beauty Bar</a>
-        <div class="d-nav-links">
+        <a class="g-logo" href="#top">Glow Beauty Bar</a>
+        <nav class="g-nav-links">
           <a href="#services">Services</a>
-          <a href="#about">About</a>
-          <a href="#booking">Book Now</a>
-        </div>
-        <a class="d-nav-cta" href="#booking">Book Treatment</a>
-        <button class="d-menu-toggle" aria-label="Open menu" onclick="document.getElementById('dmobile').classList.toggle('open')">☰</button>
+          <a href="#experience">The Experience</a>
+          <a href="#booking">Book</a>
+        </nav>
+        <a class="g-nav-book" href="#booking">Book a Treatment</a>
+        <button class="g-mtoggle" aria-label="Open menu" onclick="document.getElementById('gmnav').classList.toggle('open')">☰</button>
       </div>
     </div>
-    <div class="d-mobile-nav" id="dmobile">
+    <div class="g-mnav" id="gmnav">
       <a href="#services">Services</a>
-      <a href="#about">About</a>
-      <a class="d-btn-primary" href="#booking">Book Treatment</a>
+      <a href="#experience">The Experience</a>
+      <a href="#booking">Book</a>
+      <a class="g-btn g-btn-fill" href="#booking">Book a Treatment</a>
     </div>
   </nav>
 
-  <!-- Hero -->
-  <section class="d-hero" id="top">
-    <div class="d-hero-bg"></div>
-    <div class="d-container">
-      <div class="d-hero-content">
-        <span class="d-eyebrow">Glow Beauty Bar</span>
-        <div class="d-hero-accent-line"></div>
-        <h1>Enhancing your natural beauty.</h1>
-        <p>A beauty experience rooted in intention, care, and quality. From facials to lash lifts, every service is designed to help you feel your best — naturally and confidently.</p>
-        <div class="d-hero-actions">
-          <a class="d-btn-primary" href="#booking">Book a Treatment</a>
-          <a class="d-btn-ghost" href="#services">View Services</a>
-        </div>
+  <!-- Hero — centered, airy, elegant serif -->
+  <section class="g-hero" id="top">
+    <div class="wrap">
+      <span class="g-eyebrow">Glow Beauty Bar</span>
+      <h1>
+        Enhancing your<br />
+        <em>natural beauty.</em>
+      </h1>
+      <p>A beauty studio rooted in intention, care, and craftsmanship. Every service is personalized — no generic routines, no shortcuts. Just you at your best.</p>
+      <div class="g-hero-btns">
+        <a class="g-btn g-btn-fill" href="#booking">Book a Treatment</a>
+        <a class="g-btn g-btn-line" href="#services">View Services</a>
       </div>
     </div>
   </section>
 
-  <hr class="d-divider" />
+  <hr class="g-divider" />
 
   <!-- Services -->
-  <section class="d-section" id="services">
-    <div class="d-container">
-      <span class="d-section-eyebrow">What We Offer</span>
-      <h2>Our Treatments</h2>
-      <p class="d-section-sub">Every service is crafted to bring out what's already there — cleaner skin, lifted lashes, defined brows, and a glow that lasts.</p>
-      <div class="d-services-grid">
-        <div class="d-service-card">
-          <span class="d-service-icon">🌸</span>
-          <h3>Signature Facial</h3>
-          <p>A custom facial designed around your skin type — deep cleanse, exfoliation, mask, and hydration treatment tailored to you.</p>
-          <p class="d-service-price">$85</p>
+  <section class="g-section" id="services">
+    <div class="wrap">
+      <span class="g-label">Signature Treatments</span>
+      <h2>Our Services</h2>
+      <p class="g-sub">Each treatment is chosen and performed to bring out what's already there — clearer skin, lifted features, and a glow that lasts beyond the appointment.</p>
+      <div class="g-services">
+        <div class="g-service">
+          <div class="g-service-icon">🌸</div>
+          <div class="g-service-body">
+            <h3>Signature Facial</h3>
+            <p>A custom facial designed around your skin type — deep cleanse, exfoliation, mask, and targeted hydration from start to finish.</p>
+            <div class="g-service-price">From $85</div>
+          </div>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">✨</span>
-          <h3>Lash Lift &amp; Tint</h3>
-          <p>Lift, curl, and tint your natural lashes for a wide-eye look that lasts 6–8 weeks — no extensions needed.</p>
-          <p class="d-service-price">$75</p>
+        <div class="g-service">
+          <div class="g-service-icon">✨</div>
+          <div class="g-service-body">
+            <h3>Lash Lift &amp; Tint</h3>
+            <p>Lift, curl, and tint your natural lashes for a wide-eye look that lasts 6–8 weeks. No extensions needed.</p>
+            <div class="g-service-price">$75</div>
+          </div>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">🌿</span>
-          <h3>Brow Lamination</h3>
-          <p>Sleek, brushed-up brows with a lamination treatment. Defined, fluffy, and full — exactly how you've pinned it.</p>
-          <p class="d-service-price">$65</p>
+        <div class="g-service">
+          <div class="g-service-icon">🌿</div>
+          <div class="g-service-body">
+            <h3>Brow Lamination</h3>
+            <p>Sleek, brushed-up brows with a lamination treatment. Fluffy, defined, and shaped exactly how you've envisioned them.</p>
+            <div class="g-service-price">$65</div>
+          </div>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">💧</span>
-          <h3>Hydro Glow Treatment</h3>
-          <p>Deep hydration facial with a vitamin-infused mask, perfect for dry or sensitive skin. Your skin will feel new.</p>
-          <p class="d-service-price">$95</p>
+        <div class="g-service">
+          <div class="g-service-icon">💧</div>
+          <div class="g-service-body">
+            <h3>Hydro Glow Treatment</h3>
+            <p>Deep hydration facial with a vitamin-infused mask — perfect for dry or sensitive skin. You'll feel the difference immediately.</p>
+            <div class="g-service-price">$95</div>
+          </div>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">🎀</span>
-          <h3>Brow Wax &amp; Shape</h3>
-          <p>Clean, precise brow shaping that frames your face. Includes wax and tweeze with a tint option available.</p>
-          <p class="d-service-price">$30</p>
+        <div class="g-service">
+          <div class="g-service-icon">🎀</div>
+          <div class="g-service-body">
+            <h3>Brow Wax &amp; Shape</h3>
+            <p>Precise brow shaping that frames your face. Includes wax and tweeze with an optional tint to finish.</p>
+            <div class="g-service-price">$30</div>
+          </div>
         </div>
-        <div class="d-service-card">
-          <span class="d-service-icon">💆‍♀️</span>
-          <h3>Glow Package</h3>
-          <p>Signature facial + lash lift + brow shape — the full treatment experience in one appointment.</p>
-          <p class="d-service-price">$200</p>
+        <div class="g-service">
+          <div class="g-service-icon">💆‍♀️</div>
+          <div class="g-service-body">
+            <h3>The Glow Package</h3>
+            <p>Signature facial + lash lift + brow shape. The full treatment experience in a single appointment — our most popular booking.</p>
+            <div class="g-service-price">$200</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="d-divider" />
+  <hr class="g-divider" />
 
-  <!-- About -->
-  <section class="d-section" id="about">
-    <div class="d-container">
-      <div style="max-width: 720px;">
-        <span class="d-section-eyebrow">The Glow Philosophy</span>
-        <h2>Beauty that honors who you are.</h2>
-        <p style="color:var(--demo-muted); line-height:1.8; font-size:1.05rem; margin:14px 0 22px;">At Glow Beauty Bar, we believe great beauty care isn't about changing who you are — it's about bringing out what's already there. Every treatment starts with your skin, your features, and your goals. No one-size-fits-all routines. Just thoughtful care with clean products and skilled hands.</p>
-        <p style="color:var(--demo-muted); line-height:1.8; font-size:1.05rem;">We see every appointment as an experience — from the moment you walk in to the moment you leave glowing. First-time client? We'll take time to understand your skin before we begin.</p>
+  <!-- Experience section -->
+  <section class="g-exp" id="experience">
+    <div class="wrap">
+      <span class="g-label">What to Expect</span>
+      <h2>The Glow Experience</h2>
+      <p class="g-sub">Every visit is designed to feel like more than just a treatment. Here's what sets Glow Beauty Bar apart.</p>
+      <div class="g-exp-grid">
+        <div class="g-exp-item">
+          <div class="g-exp-num">01</div>
+          <div>
+            <h3>A Personalized Consultation</h3>
+            <p>Before every first visit, we take time to understand your skin, your goals, and what you're working with. No guessing, no assumptions.</p>
+          </div>
+        </div>
+        <div class="g-exp-item">
+          <div class="g-exp-num">02</div>
+          <div>
+            <h3>Clean, Premium Products</h3>
+            <p>We use only high-quality, skin-safe products — no harsh chemicals, no cutting corners. Your skin deserves the real thing.</p>
+          </div>
+        </div>
+        <div class="g-exp-item">
+          <div class="g-exp-num">03</div>
+          <div>
+            <h3>A Calm, Pampering Environment</h3>
+            <p>From the moment you walk in, the environment is designed to feel peaceful and unhurried. Your appointment is your time.</p>
+          </div>
+        </div>
+        <div class="g-exp-item">
+          <div class="g-exp-num">04</div>
+          <div>
+            <h3>Results That Last</h3>
+            <p>You leave glowing — not just for the day. Every service is performed for lasting results, not just a quick fix.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <hr class="d-divider" />
+  <!-- Testimonial -->
+  <section class="g-testimonial">
+    <div class="wrap">
+      <span class="g-tq-mark">&ldquo;</span>
+      <p class="g-tq-text">I've tried so many places and nothing compares. My skin has never looked better and every visit feels like a genuine treat.</p>
+      <p class="g-tq-attr">&mdash; Returning client since 2022</p>
+    </div>
+  </section>
 
-  <!-- Booking CTA -->
-  <section class="d-cta-band" id="booking">
-    <div class="d-container">
-      <span class="d-section-eyebrow">Ready to Glow?</span>
-      <h2>Book your treatment today.</h2>
-      <p>New clients always welcome. Book online, text, or reach out via DM to schedule your first appointment. Same-week availability often available.</p>
-      <div class="d-cta-actions">
-        <a class="d-btn-primary" href="mailto:hello@glowbeautybar.example">Book an Appointment</a>
-        <a class="d-btn-ghost" href="tel:+15550003333">Call or Text: (555) 000-3333</a>
+  <!-- CTA -->
+  <section class="g-cta" id="booking">
+    <div class="wrap">
+      <span class="g-label">Ready to Book?</span>
+      <h2>Book your first treatment.<br /><em>New clients always welcome.</em></h2>
+      <p>Same-week appointments often available. Reach out via email or text to get started — we'll match you to the right service.</p>
+      <div class="g-cta-btns">
+        <a class="g-btn g-btn-fill" href="mailto:hello@glowbeautybar.example">Book an Appointment</a>
+        <a class="g-btn g-btn-line" href="tel:+15550003333">Call or Text: (555) 000-3333</a>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="d-footer">
-    <div class="d-container">
-      <div class="d-footer-inner">
+  <footer class="g-footer">
+    <div class="wrap">
+      <div class="g-footer-in">
         <div>
-          <div class="d-footer-logo">Glow Beauty Bar</div>
-          <div class="d-footer-tagline">Enhancing your natural beauty.</div>
+          <div class="g-footer-logo">Glow Beauty Bar</div>
+          <div class="g-footer-sub">Enhancing your natural beauty.</div>
         </div>
-        <div class="d-footer-credit">
+        <div class="g-footer-credit">
           Website by <a href="../index.html">Books and Brews</a><br>
-          <span style="font-size:.75rem; opacity:.6;">This is a demo site — <a href="../portfolio.html">view portfolio</a></span>
+          <span style="font-size:.75rem; color: var(--muted-lt);">Demo site — <a href="../portfolio.html">view portfolio</a></span>
         </div>
       </div>
     </div>
