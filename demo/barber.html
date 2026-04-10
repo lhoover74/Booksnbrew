@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elite Cuts Barber | Precision Cuts. Clean Finishes.</title>
-  <meta name="description" content="Elite Cuts Barber — sharp fades, clean lineups, and a premium barbershop experience that keeps you coming back. Walk-ins welcome." />
+  <title>Elite Cuts Barber | Premium Barbershop Experience</title>
+  <meta name="description" content="Elite Cuts Barber — sharp fades, clean lineups, precision cuts. Walk-ins welcome. Book your appointment today." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="barber.css" />
 </head>
 <body>
@@ -16,196 +16,176 @@
   <nav class="b-nav">
     <div class="wrap">
       <div class="inner">
-        <span class="b-logo">Elite <span>Cuts</span></span>
+        <a class="b-logo" href="#top"><span>Elite</span> Cuts</a>
         <nav class="b-nav-links">
           <a href="#services">Services</a>
-          <a href="#stats">About</a>
-          <a href="#location">Location</a>
-          <a href="#contact">Book</a>
+          <a href="#about">About</a>
+          <a href="#location">Find Us</a>
         </nav>
-        <a class="b-nav-book" href="#contact">Book a Cut</a>
+        <a class="b-nav-book" href="#booking">Book Now</a>
         <button class="b-mtoggle" aria-label="Open menu" onclick="document.getElementById('bmnav').classList.toggle('open')">☰</button>
       </div>
     </div>
     <div class="b-mnav" id="bmnav">
       <a href="#services">Services</a>
-      <a href="#stats">About</a>
-      <a href="#location">Location</a>
-      <a class="b-btn b-btn-fill" href="#contact">Book a Cut</a>
+      <a href="#about">About</a>
+      <a href="#location">Find Us</a>
+      <a class="b-btn b-btn-fill" href="#booking">Book Now</a>
     </div>
   </nav>
 
-  <!-- Hero — bold, oversized, stacked headline with ghost number -->
+  <!-- Hero -->
   <section class="b-hero" id="top">
+    <div class="b-hero-num" aria-hidden="true">EC</div>
     <div class="wrap">
-      <div class="b-hero-num" aria-hidden="true">EC</div>
       <div class="b-hero-inner">
-        <div class="b-hero-label">Elite Cuts Barber &mdash; Est. 2019</div>
-        <h1>
-          Precision.<br />
-          <span>Every time.</span>
-        </h1>
-        <p class="b-hero-sub">More than a haircut — it's a standard. Sharp fades, clean lineups, expert beard work. A barbershop built for men who care about the details.</p>
+        <div class="b-hero-tag">Premium Barbershop</div>
+        <h1>Sharp.<br /><span>Precise.</span><br />Clean.</h1>
+        <p>Every cut is an investment in how you show up. Elite Cuts delivers sharp, precise work — no shortcuts, no rushing, no compromising.</p>
         <div class="b-hero-btns">
-          <a class="b-btn b-btn-fill" href="#contact">Book Your Cut</a>
-          <a class="b-btn b-btn-line" href="#services">View Pricing</a>
+          <a class="b-btn b-btn-fill" href="#booking">Book Your Cut</a>
+          <a class="b-btn b-btn-line" href="#services">View Services</a>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="b-divider" />
+  <!-- Accent Band -->
+  <div class="b-accent-band">
+    <div class="wrap">
+      <span>Precision Cuts</span>
+      <span class="b-band-sep">·</span>
+      <span>Sharp Fades</span>
+      <span class="b-band-sep">·</span>
+      <span>Clean Lineups</span>
+      <span class="b-band-sep">·</span>
+      <span>Beard Trims</span>
+      <span class="b-band-sep">·</span>
+      <span>Walk-Ins Welcome</span>
+    </div>
+  </div>
 
-  <!-- Services — price menu board -->
+  <!-- Services / Price Board -->
   <section class="b-section" id="services">
     <div class="wrap">
-      <div class="b-overline">Services &amp; Pricing</div>
-      <h2>The Menu</h2>
-      <div class="b-menu-grid">
+      <span class="b-overline">What We Do</span>
+      <h2>Services</h2>
+      <span class="b-section-rule"></span>
+      <div class="b-price-grid">
         <div class="b-menu-item">
-          <div class="b-menu-left">
-            <span class="b-menu-icon">💈</span>
-            <div>
-              <div class="b-menu-name">Signature Fade</div>
-              <div class="b-menu-desc">Low, mid, or high — includes lineup</div>
-            </div>
-          </div>
-          <div class="b-menu-pricing">
-            <div class="b-menu-price">$35</div>
+          <div class="b-item-name">Signature Fade</div>
+          <div class="b-item-desc">Tapered, blended, and finished to perfection. Skin fade, low, mid, or high — cut to your exact preference.</div>
+          <div class="b-menu-foot">
+            <div class="b-item-price">$35</div>
+            <div class="b-item-dur">45 min</div>
           </div>
         </div>
         <div class="b-menu-item">
-          <div class="b-menu-left">
-            <span class="b-menu-icon">✂️</span>
-            <div>
-              <div class="b-menu-name">Classic Haircut</div>
-              <div class="b-menu-desc">Scissor or clipper, any style</div>
-            </div>
-          </div>
-          <div class="b-menu-pricing">
-            <div class="b-menu-price">$28</div>
+          <div class="b-item-name">Classic Cut</div>
+          <div class="b-item-desc">Shape, style, and finish. Traditional scissor or clipper cut with clean lines and natural styling.</div>
+          <div class="b-menu-foot">
+            <div class="b-item-price">$30</div>
+            <div class="b-item-dur">40 min</div>
           </div>
         </div>
         <div class="b-menu-item">
-          <div class="b-menu-left">
-            <span class="b-menu-icon">🪒</span>
-            <div>
-              <div class="b-menu-name">Beard Trim &amp; Shape</div>
-              <div class="b-menu-desc">Full beard service, hot towel available</div>
-            </div>
-          </div>
-          <div class="b-menu-pricing">
-            <div class="b-menu-price">$22</div>
+          <div class="b-item-name">Lineup &amp; Edge</div>
+          <div class="b-item-desc">Sharp hairline, crisp temple edges, and clean neckline. Between cuts or as an add-on.</div>
+          <div class="b-menu-foot">
+            <div class="b-item-price">$20</div>
+            <div class="b-item-dur">20 min</div>
           </div>
         </div>
         <div class="b-menu-item">
-          <div class="b-menu-left">
-            <span class="b-menu-icon">⚡</span>
-            <div>
-              <div class="b-menu-name">Cut + Beard Combo</div>
-              <div class="b-menu-desc">Full cut and beard in one visit</div>
-            </div>
-          </div>
-          <div class="b-menu-pricing">
-            <div class="b-menu-price">$52</div>
+          <div class="b-item-name">Beard Trim &amp; Shape</div>
+          <div class="b-item-desc">Sculpted, defined, and finished with hot towel or balm. Pairs with any cut or standalone.</div>
+          <div class="b-menu-foot">
+            <div class="b-item-price">$22</div>
+            <div class="b-item-dur">25 min</div>
           </div>
         </div>
         <div class="b-menu-item">
-          <div class="b-menu-left">
-            <span class="b-menu-icon">👦</span>
-            <div>
-              <div class="b-menu-name">Kids Cut (Under 12)</div>
-              <div class="b-menu-desc">Patient, clean, done right</div>
-            </div>
-          </div>
-          <div class="b-menu-pricing">
-            <div class="b-menu-price">$22</div>
+          <div class="b-item-name">Cut + Beard Combo</div>
+          <div class="b-item-desc">The full treatment — signature fade or classic cut paired with a beard trim and shape. Our most popular booking.</div>
+          <div class="b-menu-foot">
+            <div class="b-item-price">$52</div>
+            <div class="b-item-dur">65 min</div>
           </div>
         </div>
         <div class="b-menu-item">
-          <div class="b-menu-left">
-            <span class="b-menu-icon">💳</span>
-            <div>
-              <div class="b-menu-name">Monthly Membership</div>
-              <div class="b-menu-desc">2 cuts + unlimited lineups per month</div>
-            </div>
-          </div>
-          <div class="b-menu-pricing">
-            <div class="b-menu-price">$65</div>
-            <div class="b-menu-note">per month</div>
+          <div class="b-item-name">Kids Cut (12 &amp; Under)</div>
+          <div class="b-item-desc">Patient, friendly, and clean. Great for first haircuts or regular maintenance.</div>
+          <div class="b-menu-foot">
+            <div class="b-item-price">$22</div>
+            <div class="b-item-dur">30 min</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="b-divider" />
-
-  <!-- Stats -->
-  <section class="b-section b-stats" id="stats">
+  <!-- Stats Section — full-bleed dark panel -->
+  <div class="b-stats-section" id="about">
     <div class="wrap">
-      <div class="b-overline">By the Numbers</div>
-      <h2>The Standard</h2>
       <div class="b-stats-grid">
         <div class="b-stat">
-          <div class="b-stat-num">5+</div>
-          <div class="b-stat-label">Years in Business</div>
+          <span class="b-stat-num">800+</span>
+          <span class="b-stat-lbl">Clients Served</span>
         </div>
         <div class="b-stat">
-          <div class="b-stat-num">4K+</div>
-          <div class="b-stat-label">Cuts Delivered</div>
+          <span class="b-stat-num">5★</span>
+          <span class="b-stat-lbl">Google Rating</span>
         </div>
         <div class="b-stat">
-          <div class="b-stat-num">4.9</div>
-          <div class="b-stat-label">Average Rating</div>
+          <span class="b-stat-num">6yr</span>
+          <span class="b-stat-lbl">In Business</span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <hr class="b-divider" />
-
-  <!-- Location + Hours -->
+  <!-- Location & Hours -->
   <section class="b-section" id="location">
     <div class="wrap">
-      <div class="b-overline">Find Us</div>
-      <h2>Location &amp; Hours</h2>
+      <span class="b-overline">Visit Us</span>
+      <h2>Location</h2>
+      <span class="b-section-rule"></span>
       <div class="b-loc-grid">
-        <div class="b-loc-card">
-          <h3>Hours</h3>
-          <p>
-            <strong>Monday &ndash; Friday</strong>
-            9:00 AM &ndash; 7:00 PM<br />
-            <strong>Saturday</strong>
-            8:00 AM &ndash; 5:00 PM<br />
-            <strong>Sunday</strong>
-            Closed &mdash; Make it a rest day.
-          </p>
-        </div>
         <div class="b-loc-card">
           <h3>Address</h3>
           <p>
-            <strong>Elite Cuts Barber</strong>
-            123 Main Street<br />
-            Your City, ST 00000<br /><br />
-            Walk-ins accepted when chairs are available. Booking ahead locks in your slot.
+            <strong>Elite Cuts Barbershop</strong><br>
+            1422 West Madison Ave<br>
+            Chicago, IL 60607<br><br>
+            Free street parking available.<br>
+            Blue Line stop: 2 blocks west.
+          </p>
+        </div>
+        <div class="b-loc-card">
+          <h3>Hours</h3>
+          <p>
+            <strong>Mon – Fri:</strong> 10am – 7pm<br>
+            <strong>Saturday:</strong> 9am – 5pm<br>
+            <strong>Sunday:</strong> Closed<br><br>
+            Walk-ins welcome based on availability.<br>
+            Appointments recommended for weekend visits.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <hr class="b-divider" />
-
   <!-- CTA -->
-  <section class="b-cta" id="contact">
+  <section class="b-cta" id="booking">
     <div class="wrap">
-      <div class="b-overline">Ready?</div>
-      <h2>Book Your<br />Next Cut</h2>
-      <p>Call, text, or walk in. We'll get you right. Appointments preferred, walk-ins accepted based on availability.</p>
-      <div class="b-cta-btns">
-        <a class="b-btn b-btn-fill" href="tel:+15550002222">Call or Text: (555) 000-2222</a>
-        <a class="b-btn b-btn-line" href="mailto:hello@elitecuts.example">Send an Email</a>
+      <div class="b-cta-inner">
+        <span class="b-cta-tag">Ready?</span>
+        <h2>Book your cut.</h2>
+        <p>Walk-ins are welcome, but booking guarantees your spot. Same-day and next-day availability most weeks.</p>
+        <div class="b-cta-btns">
+          <a class="b-btn b-btn-fill" href="mailto:book@elitecuts.example">Book Online</a>
+          <a class="b-btn b-btn-line" href="tel:+13125550088">Call: (312) 555-0088</a>
+        </div>
       </div>
     </div>
   </section>
@@ -215,12 +195,12 @@
     <div class="wrap">
       <div class="b-footer-in">
         <div>
-          <div class="b-footer-logo">Elite <span>Cuts</span> Barber</div>
-          <div class="b-footer-sub">Precision cuts. Clean finishes. Every time.</div>
+          <div class="b-footer-logo"><span>Elite</span> Cuts Barbershop</div>
+          <div class="b-footer-sub">Sharp. Precise. Clean. Every time.</div>
         </div>
         <div class="b-footer-credit">
           Website by <a href="../index.html">Books and Brews</a><br>
-          <span style="font-size:.75rem; opacity:.65;">Demo site — <a href="../portfolio.html">view portfolio</a></span>
+          <span style="font-size:.73rem; opacity:.6;">Demo site — <a href="../portfolio.html">view portfolio</a></span>
         </div>
       </div>
     </div>
