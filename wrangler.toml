@@ -5,6 +5,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "books-and-brews-crm"
-# TODO: replace with your actual D1 database_id from the Cloudflare dashboard
-# Workers & Pages → D1 → books-and-brews-crm → Settings → Database ID
-database_id = "YOUR_D1_DATABASE_ID"
+database_id = "7a7ae7c6-bfdf-4207-8a44-25526c058f7f"
