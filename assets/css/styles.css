@@ -166,6 +166,8 @@ input,select,textarea{width:100%;padding:14px 16px;border-radius:12px;background
 textarea{min-height:180px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(199,144,88,.75);box-shadow:0 0 0 4px rgba(199,144,88,.12)}
 .form-response{margin-top:14px;color:#dfc3aa;font-size:.95rem}
+/* Honeypot: visually hidden but accessible to bots that ignore CSS */
+.hp-field{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;tabindex:-1}
 .contact-detail{display:flex;gap:14px;align-items:flex-start;padding:20px;border:1px solid var(--border);border-radius:18px;background:rgba(255,255,255,.02)}
 .contact-detail strong{display:block;margin-bottom:4px}
 .stat-card h3{font-size:2.2rem;margin:0 0 8px;font-family:"Playfair Display",Georgia,serif;font-weight:500;color:var(--accent)}
