@@ -388,6 +388,30 @@ textarea { resize: vertical; min-height: 160px; }
   text-transform: uppercase;
 }
 
+/* ─── Pain Point Band ─── */
+.pain-band-inner {
+  padding: 64px 52px;
+  text-align: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(34,18,14,.88) 0%, rgba(54,30,22,.65) 100%);
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+}
+.pain-band-inner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, transparent 100%);
+}
+.pain-band-inner h2 {
+  max-width: 680px; margin: 0 auto 18px;
+}
+.pain-band-inner p {
+  color: var(--muted); max-width: 600px; margin: 0 auto;
+  font-size: 1.05rem; line-height: 1.85;
+}
+.pain-band-inner .button { margin-top: 32px; }
+
 /* ─── Responsive additions ─── */
 @media (max-width: 1080px) {
   .six-up { grid-template-columns: repeat(2, 1fr); }
@@ -398,6 +422,7 @@ textarea { resize: vertical; min-height: 160px; }
   .six-up { grid-template-columns: 1fr; }
   .portfolio-page-grid { grid-template-columns: 1fr; }
   .niche-tags { justify-content: flex-start; }
+  .pain-band-inner { padding: 44px 24px; }
 }
 
 /* ─── Featured Portfolio Cards (Homepage + Portfolio Page) ─── */

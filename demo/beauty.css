@@ -38,6 +38,23 @@ body {
 a { color: inherit; text-decoration: none; }
 .wrap { width: var(--c); margin: 0 auto; position: relative; z-index: 1; }
 
+/* ─── Demo Banner ─── */
+.g-demo-bar {
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+  text-align: center;
+  font-size: .76rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+.g-demo-bar a {
+  color: var(--accent); font-weight: 600;
+  border-bottom: 1px solid rgba(192,120,142,.3);
+  transition: border-color .2s;
+}
+.g-demo-bar a:hover { border-color: var(--accent); }
+
 /* ─── Nav ─── */
 .g-nav {
   position: sticky; top: 0; z-index: 100;
