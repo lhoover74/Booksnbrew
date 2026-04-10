@@ -3,15 +3,22 @@ export async function onRequestPost(context) {
     const { request, env } = context;
     const formData = await request.formData();
 
-    const formType = (formData.get("formType") || "contact").toString();
-    const name = (formData.get("name") || "").toString().trim();
-    const email = (formData.get("email") || "").toString().trim();
-    const phone = (formData.get("phone") || "").toString().trim();
-    const businessName = (formData.get("businessName") || "").toString().trim();
-    const projectType = (formData.get("projectType") || "").toString().trim();
-    const budgetRange = (formData.get("budgetRange") || "").toString().trim();
+    // ── Read form fields ──────────────────────────────────────────
+    const formType       = (formData.get("formType")       || "contact").toString();
+    const name           = (formData.get("name")           || "").toString().trim();
+    const email          = (formData.get("email")          || "").toString().trim();
+    const phone          = (formData.get("phone")          || "").toString().trim();
+    const businessName   = (formData.get("businessName")   || "").toString().trim();
+    const projectType    = (formData.get("projectType")    || "").toString().trim();
+    const budgetRange    = (formData.get("budgetRange")    || "").toString().trim();
     const projectDetails = (formData.get("projectDetails") || "").toString().trim();
-    const message = (formData.get("message") || "").toString().trim();
+    const message        = (formData.get("message")        || "").toString().trim();
+
+    // ── Spam traps ────────────────────────────────────────────────
+    // Honeypot: visually hidden field. Bots fill it; real users do not.
+    const honeypot = (formData.get("website") || "").toString().trim();
+    // Cloudflare Turnstile widget token injected automatically by the browser script.
+    const turnstileToken = (formData.get("cf-turnstile-response") || "").toString().trim();
 
     if (!name || !email) {
       return jsonResponse(
@@ -20,12 +27,32 @@ export async function onRequestPost(context) {
       );
     }
 
-    const isQuote = formType === "quote";
-    const isHighValue =
-      budgetRange &&
-      (budgetRange.includes("$5,000") || budgetRange.includes("5000"));
+    // ── Turnstile server-side verification ────────────────────────
+    // Requires TURNSTILE_SECRET_KEY set in Cloudflare Pages →
+    // Settings → Environment Variables (see README).
+    // If the binding is absent (e.g. local dev), verification is skipped.
+    const clientIP = request.headers.get("CF-Connecting-IP") || "";
+    let turnstileValid = true;
+    if (env.TURNSTILE_SECRET_KEY) {
+      turnstileValid = await verifyTurnstile(turnstileToken, env.TURNSTILE_SECRET_KEY, clientIP);
+    }
 
-    const priority = isHighValue ? "High" : "Normal";
+    // ── Lead scoring: High | Normal | Spam ───────────────────────
+    const spamScore = scoreSubmission({
+      honeypot,
+      turnstileValid,
+      message,
+      projectDetails,
+      budgetRange,
+      phone
+    });
+
+    const isSpam  = spamScore === "Spam";
+    const isQuote = formType === "quote";
+
+    // priority mirrors the spam score; for non-spam, business logic determines High/Normal
+    const priority = spamScore;
+
     const submittedAt = new Date().toISOString();
     const displaySubmittedAt = new Date(submittedAt).toLocaleString("en-US", {
       dateStyle: "medium",
@@ -33,8 +60,10 @@ export async function onRequestPost(context) {
     });
     const sourcePage = getSourcePage(request, formType);
 
+    // ── Persist to D1 ─────────────────────────────────────────────
+    // All submissions (including spam) are stored for audit purposes.
+    // Spam submissions get status = 'Spam'; others start as 'New'.
     let leadId = null;
-
     if (env.DB) {
       leadId = await saveLead(env.DB, {
         formType,
@@ -48,17 +77,22 @@ export async function onRequestPost(context) {
         projectDetails,
         sourcePage,
         priority,
+        spamScore,
         submittedAt
       });
     }
 
-    const subject = isQuote
-      ? `🔥 New Website Quote Request (${budgetRange || "No Budget"}) - ${name}`
-      : `📩 New Website Inquiry - ${name}`;
+    // ── Email configuration ───────────────────────────────────────
+    // Set RESEND_FROM_EMAIL and ADMIN_EMAIL in Cloudflare Pages →
+    // Settings → Environment Variables (see README).
+    const fromEmail  = env.RESEND_FROM_EMAIL || "quotes@booksnbrew.govdirect.org";
+    const adminEmail = env.ADMIN_EMAIL       || "michael@govdirect.org";
 
-    const autoReplySubject = isQuote
-      ? "We received your quote request — Books and Brews"
-      : "We received your message — Books and Brews";
+    // ── Admin notification (always sent, even for spam) ───────────
+    const spamPrefix = isSpam ? "🚫 [SPAM] " : "";
+    const subject = isQuote
+      ? `${spamPrefix}🔥 New Website Quote Request (${budgetRange || "No Budget"}) - ${name}`
+      : `${spamPrefix}📩 New Website Inquiry - ${name}`;
 
     const adminHtml = isQuote
       ? getAdminQuoteEmail({
@@ -71,9 +105,9 @@ export async function onRequestPost(context) {
           budgetRange,
           projectDetails,
           submittedAt: displaySubmittedAt,
-          isHighValue,
           sourcePage,
-          priority
+          priority,
+          spamScore
         })
       : getAdminContactEmail({
           leadId,
@@ -83,17 +117,9 @@ export async function onRequestPost(context) {
           message,
           submittedAt: displaySubmittedAt,
           sourcePage,
-          priority
+          priority,
+          spamScore
         });
-
-    const autoReplyHtml = isQuote
-      ? getCustomerQuoteReply({
-          name,
-          businessName,
-          projectType,
-          budgetRange
-        })
-      : getCustomerContactReply({ name });
 
     const adminSend = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -102,54 +128,55 @@ export async function onRequestPost(context) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
-        to: ["michael@govdirect.org"],
+        from:    `Books and Brews <${fromEmail}>`,
+        to:      [adminEmail],
         subject,
-        html: adminHtml,
+        html:    adminHtml,
         replyTo: email
       })
     });
 
     const adminData = await adminSend.json();
-
     if (!adminSend.ok) {
-      return jsonResponse(
-        {
-          ok: false,
-          error: adminData
-        },
-        500
-      );
+      return jsonResponse({ ok: false, error: adminData }, 500);
     }
 
-    const customerSend = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        from: "Books and Brews <quotes@booksnbrew.govdirect.org>",
-        to: [email],
-        subject: autoReplySubject,
-        html: autoReplyHtml,
-        replyTo: "michael@govdirect.org"
-      })
-    });
+    // ── Auto-reply (skipped for spam) ─────────────────────────────
+    // Do not notify the submitter when they have been classified as spam.
+    // We still redirect to thank-you.html to avoid revealing the classification.
+    if (!isSpam) {
+      const autoReplySubject = isQuote
+        ? "We received your quote request — Books and Brews"
+        : "We received your message — Books and Brews";
 
-    const customerData = await customerSend.json();
+      const autoReplyHtml = isQuote
+        ? getCustomerQuoteReply({ name, businessName, projectType, budgetRange })
+        : getCustomerContactReply({ name });
 
-    if (!customerSend.ok) {
-      return jsonResponse(
-        {
-          ok: false,
-          error: customerData
+      const customerSend = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.RESEND_API_KEY}`,
+          "Content-Type": "application/json"
         },
-        500
-      );
+        body: JSON.stringify({
+          from:    `Books and Brews <${fromEmail}>`,
+          to:      [email],
+          subject: autoReplySubject,
+          html:    autoReplyHtml,
+          replyTo: adminEmail
+        })
+      });
+
+      const customerData = await customerSend.json();
+      if (!customerSend.ok) {
+        return jsonResponse({ ok: false, error: customerData }, 500);
+      }
     }
 
+    // Redirect to thank-you regardless of spam classification.
     return Response.redirect("https://booksnbrew.pages.dev/thank-you.html", 302);
+
   } catch (error) {
     return jsonResponse(
       {
@@ -161,7 +188,86 @@ export async function onRequestPost(context) {
   }
 }
 
+// ── Turnstile server-side verification ───────────────────────────
+// Calls the Cloudflare Turnstile /siteverify endpoint.
+// Returns true only when Cloudflare confirms the token is genuine.
+async function verifyTurnstile(token, secret, ip) {
+  if (!token) return false;
+
+  const body = new URLSearchParams({ secret, response: token });
+  if (ip) body.set("remoteip", ip);
+
+  const res  = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    body
+  });
+  const data = await res.json();
+  return data.success === true;
+}
+
+// ── Lead scoring ──────────────────────────────────────────────────
+// Returns: 'Spam' | 'High' | 'Normal'
+//
+// Resolution order:
+//   1. Hard traps  → honeypot filled or Turnstile failed → Spam
+//   2. Soft signal accumulation score ≥ 3              → Spam
+//   3. High-value budget tier or project-intent signals → High
+//   4. Everything remaining                             → Normal
+function scoreSubmission({ honeypot, turnstileValid, message, projectDetails, budgetRange, phone }) {
+  // Hard traps: automatic spam classification
+  if (honeypot)        return "Spam";
+  if (!turnstileValid) return "Spam";
+
+  const body = ((message || "") + " " + (projectDetails || "")).toLowerCase();
+
+  let spamPoints = 0;
+
+  // Very short / empty body — likely a bot probe
+  if (body.trim().length < 10) spamPoints += 2;
+
+  // Multiple URLs — common in link-spam submissions
+  const urlMatches = body.match(/https?:\/\//g) || [];
+  if (urlMatches.length >= 2) spamPoints += urlMatches.length;
+
+  // Known spam topic keywords
+  const spamKeywords = [
+    "casino", "viagra", "loan offer", "payday loan", "crypto ",
+    "bitcoin", "nft ", "backlink", "guest post", "seo service",
+    "adult content", "make money fast", "earn $"
+  ];
+  for (const kw of spamKeywords) {
+    if (body.includes(kw)) spamPoints += 2;
+  }
+
+  if (spamPoints >= 3) return "Spam";
+
+  // High-value: budget-based (quote form)
+  if (
+    budgetRange &&
+    (budgetRange.includes("5,000") || budgetRange.includes("5000") ||
+     budgetRange.includes("10,000") || budgetRange.includes("10000") ||
+     budgetRange.includes("+"))
+  ) {
+    return "High";
+  }
+
+  // High-value: project-intent keywords + phone provided (contact form)
+  const highValueKeywords = [
+    "project", "launch", "ecommerce", "e-commerce", "redesign",
+    "online store", "deadline", "urgent", "asap", "my business",
+    "our business", "website for"
+  ];
+  if (phone && highValueKeywords.some((kw) => body.includes(kw))) return "High";
+
+  return "Normal";
+}
+
+// ── D1 persistence ────────────────────────────────────────────────
+// spam_score column was added in migrations/001_add_spam_score.sql.
+// status is set to 'Spam' for spam submissions; 'New' for everyone else.
 async function saveLead(DB, lead) {
+  const status = lead.spamScore === "Spam" ? "Spam" : "New";
+
   const result = await DB.prepare(`
     INSERT INTO leads (
       form_type,
@@ -176,22 +282,25 @@ async function saveLead(DB, lead) {
       source_page,
       status,
       priority,
+      spam_score,
       submitted_at,
       updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'New', ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
     .bind(
       lead.formType,
       lead.name,
       lead.email,
-      lead.phone || null,
-      lead.businessName || null,
-      lead.projectType || null,
-      lead.budgetRange || null,
-      lead.message || null,
+      lead.phone          || null,
+      lead.businessName   || null,
+      lead.projectType    || null,
+      lead.budgetRange    || null,
+      lead.message        || null,
       lead.projectDetails || null,
       lead.sourcePage,
+      status,
       lead.priority,
+      lead.spamScore,
       lead.submittedAt,
       lead.submittedAt
     )
@@ -232,8 +341,10 @@ function getAdminContactEmail({
   message,
   submittedAt,
   sourcePage,
-  priority
+  priority,
+  spamScore
 }) {
+  const isSpam = spamScore === "Spam";
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -255,15 +366,23 @@ function getAdminContactEmail({
               Books and Brews
             </div>
             <h1 style="margin:0;font-size:32px;line-height:1.1;color:#f5ede3;font-family:Georgia,serif;font-weight:700;">
-              New Contact Inquiry
+              ${isSpam ? "⚠️ Spam Submission Detected" : "New Contact Inquiry"}
             </h1>
             <p style="margin:12px 0 0;font-size:15px;line-height:1.8;color:#d6c6b8;">
-              A new lead just came in through your website contact form.
+              ${isSpam
+                ? "This submission was flagged as spam and saved for audit. No auto-reply was sent."
+                : "A new lead just came in through your website contact form."}
             </p>
           </div>
 
+          ${isSpam ? `
+          <div style="margin:20px 28px 0;padding:14px 18px;background:rgba(200,50,50,.15);border:1px solid rgba(200,50,50,.4);border-radius:14px;color:#f5ede3;font-size:14px;line-height:1.8;">
+            🚫 <strong>Spam Classification:</strong> This submission failed one or more spam checks (Turnstile, honeypot, or content scoring). No auto-reply was sent to the submitter.
+          </div>` : ""}
+
           <div style="padding:28px;">
             ${leadId ? infoRow("Lead ID", String(leadId)) : ""}
+            ${infoRow("Spam Score", spamScore)}
             ${infoRow("Priority", priority)}
             ${infoRow("Name", name)}
             ${infoRow("Email", email)}
@@ -280,9 +399,10 @@ function getAdminContactEmail({
               </div>
             </div>
 
+            ${!isSpam ? `
             <div style="margin-top:24px;padding:16px 18px;background:rgba(199,144,88,.08);border:1px solid rgba(199,144,88,.24);border-radius:14px;color:#e9d8c8;font-size:14px;line-height:1.8;">
               Reply directly to this email to respond to <strong>${escapeHtml(name)}</strong>.
-            </div>
+            </div>` : ""}
           </div>
         </div>
       </div>
@@ -302,10 +422,12 @@ function getAdminQuoteEmail({
   budgetRange,
   projectDetails,
   submittedAt,
-  isHighValue,
   sourcePage,
-  priority
+  priority,
+  spamScore
 }) {
+  const isSpam    = spamScore === "Spam";
+  const isHighValue = priority === "High";
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -327,24 +449,28 @@ function getAdminQuoteEmail({
               Books and Brews
             </div>
             <h1 style="margin:0;font-size:32px;line-height:1.1;color:#f5ede3;font-family:Georgia,serif;font-weight:700;">
-              New Quote Request
+              ${isSpam ? "⚠️ Spam Submission Detected" : "New Quote Request"}
             </h1>
             <p style="margin:12px 0 0;font-size:15px;line-height:1.8;color:#d6c6b8;">
-              A new project inquiry was submitted through your website quote form.
+              ${isSpam
+                ? "This submission was flagged as spam and saved for audit. No auto-reply was sent."
+                : "A new project inquiry was submitted through your website quote form."}
             </p>
-            ${
-              isHighValue
-                ? `
-            <div style="margin-top:18px;display:inline-block;padding:12px 16px;background:#c79058;color:#1a120e;border-radius:12px;font-size:14px;font-weight:700;">
+            ${isHighValue && !isSpam
+              ? `<div style="margin-top:18px;display:inline-block;padding:12px 16px;background:#c79058;color:#1a120e;border-radius:12px;font-size:14px;font-weight:700;">
               High Value Lead
-            </div>
-            `
-                : ""
-            }
+            </div>`
+              : ""}
           </div>
+
+          ${isSpam ? `
+          <div style="margin:20px 28px 0;padding:14px 18px;background:rgba(200,50,50,.15);border:1px solid rgba(200,50,50,.4);border-radius:14px;color:#f5ede3;font-size:14px;line-height:1.8;">
+            🚫 <strong>Spam Classification:</strong> This submission failed one or more spam checks (Turnstile, honeypot, or content scoring). No auto-reply was sent to the submitter.
+          </div>` : ""}
 
           <div style="padding:28px;">
             ${leadId ? infoRow("Lead ID", String(leadId)) : ""}
+            ${infoRow("Spam Score", spamScore)}
             ${infoRow("Priority", priority)}
             ${infoRow("Name", name)}
             ${infoRow("Email", email)}
@@ -364,9 +490,10 @@ function getAdminQuoteEmail({
               </div>
             </div>
 
+            ${!isSpam ? `
             <div style="margin-top:24px;padding:16px 18px;background:rgba(199,144,88,.08);border:1px solid rgba(199,144,88,.24);border-radius:14px;color:#e9d8c8;font-size:14px;line-height:1.8;">
               Reply directly to this email to respond to <strong>${escapeHtml(name)}</strong>.
-            </div>
+            </div>` : ""}
           </div>
         </div>
       </div>

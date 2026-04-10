@@ -1,0 +1,8 @@
+name = "booksnbrew"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "books-and-brews-crm"
+database_id = "7a7ae7c6-bfdf-4207-8a44-25526c058f7f"

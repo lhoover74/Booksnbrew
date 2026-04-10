@@ -15,6 +15,10 @@
     rel="stylesheet"
   />
   <link rel="stylesheet" href="/assets/css/styles.css" />
+  <!-- Cloudflare Turnstile widget script. Replace the data-sitekey value below
+       with your actual Turnstile Site Key from the Cloudflare dashboard.
+       See README → Cloudflare Turnstile setup for instructions. -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <div class="site-shell">
@@ -97,6 +101,20 @@
               >
                 <input type="hidden" name="formType" value="contact" />
 
+                <!-- Honeypot: visually hidden from real users via CSS.
+                     Bots that auto-fill forms will populate this field,
+                     triggering spam classification on the server. -->
+                <div class="hp-field" aria-hidden="true">
+                  <label for="contact-website">Website</label>
+                  <input
+                    id="contact-website"
+                    name="website"
+                    type="text"
+                    autocomplete="off"
+                    tabindex="-1"
+                  />
+                </div>
+
                 <div>
                   <label for="contact-name">Name</label>
                   <input
@@ -137,6 +155,14 @@
                     placeholder="Tell us what you need, what kind of business you have, and what you’re looking for."
                     required
                   ></textarea>
+                </div>
+
+                <div class="full">
+                  <div
+                    class="cf-turnstile"
+                    data-sitekey="0x4AAAAAAC4dMQ4ZF90YwUlR"
+                    data-theme="dark"
+                  ></div>
                 </div>
 
                 <div class="full">
