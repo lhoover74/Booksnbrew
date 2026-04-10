@@ -194,8 +194,9 @@ textarea { resize: vertical; min-height: 160px; }
 }
 .pricing-popular {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+  box-shadow: 0 0 0 1px var(--accent), 0 28px 70px rgba(0,0,0,.5);
   position: relative;
+  background: linear-gradient(180deg, rgba(52,30,18,.88), rgba(28,18,14,.92));
 }
 .popular-badge {
   position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
@@ -297,6 +298,56 @@ textarea { resize: vertical; min-height: 160px; }
   color: var(--muted); line-height: 1.7; padding-left: 24px; position: relative;
 }
 .intro-bullets li::before { content: "✓"; color: var(--accent); font-weight: 700; position: absolute; left: 0; }
+
+/* ─── Pricing Recommendation Label ─── */
+.pricing-rec {
+  font-size: .8rem; font-weight: 700; color: var(--accent);
+  letter-spacing: .06em; text-transform: uppercase;
+  text-align: center; margin: -6px 0 14px;
+  opacity: .9;
+}
+
+/* ─── Industry Niche Cards ─── */
+.niche-card-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 18px; margin-top: 28px;
+}
+.niche-card {
+  padding: 34px 24px; text-align: center;
+  background: linear-gradient(180deg, rgba(38,25,22,.74), rgba(22,16,14,.78));
+  border: 1px solid var(--line); border-radius: 18px;
+  transition: border-color .2s;
+}
+.niche-card:hover { border-color: var(--line-strong); }
+.niche-card-icon { font-size: 2rem; display: block; margin-bottom: 16px; }
+.niche-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; margin: 0 0 8px;
+}
+.niche-card p { color: var(--muted); font-size: .875rem; line-height: 1.65; margin: 0; }
+
+/* ─── Portfolio page card styles ─── */
+.port-page-grid { display: grid; gap: 36px; }
+.port-page-card {
+  display: grid; grid-template-columns: 420px 1fr; gap: 0;
+  background: linear-gradient(180deg, rgba(38,25,22,.74), rgba(22,16,14,.78));
+  border: 1px solid var(--line); border-radius: 18px; overflow: hidden;
+}
+.port-page-body { padding: 40px 36px; }
+.port-page-body h3 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; margin: 0 0 12px; }
+.port-for-label { font-size: .8rem; letter-spacing: .14em; color: var(--accent); font-weight: 700; margin: 0 0 8px; }
+.port-page-features { list-style: none; padding: 0; margin: 16px 0 24px; display: grid; gap: 8px; }
+.port-page-features li { color: var(--muted); font-size: .9rem; padding-left: 20px; position: relative; }
+.port-page-features li::before { content: '→'; color: var(--accent); position: absolute; left: 0; font-size: .8rem; }
+.port-page-cta { align-self: flex-start; }
+
+@media (max-width: 1080px) {
+  .niche-card-grid { grid-template-columns: repeat(2, 1fr); }
+  .port-page-card { grid-template-columns: 1fr; }
+}
+@media (max-width: 780px) {
+  .niche-card-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
 /* ─── Quote Page Layout ─── */
 .quote-split {
