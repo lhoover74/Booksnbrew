@@ -408,20 +408,28 @@ a { color: inherit; text-decoration: none; }
 
 /* ─── Demo Banner ─── */
 .h-demo-bar {
-  background: rgba(200, 160, 100, .08);
-  border-bottom: 1px solid var(--line-m);
-  padding: 10px 0;
+  background: rgba(200, 160, 100, .04);
+  border-bottom: 1px solid var(--line);
+  padding: 9px 0;
   text-align: center;
-  font-size: .76rem;
-  color: var(--muted);
+  font-size: .74rem;
+  color: var(--faint);
   letter-spacing: .04em;
 }
 .h-demo-bar a {
-  color: var(--accent); font-weight: 700;
-  border-bottom: 1px solid rgba(200,160,100,.3);
-  transition: border-color .2s;
+  color: var(--accent); font-weight: 600;
+  transition: color .2s;
 }
-.h-demo-bar a:hover { border-color: var(--accent); }
+.h-demo-bar a:hover { color: var(--accent-hi); }
+
+/* ─── Get This Style CTA ─── */
+.h-get-style {
+  margin-top: 18px;
+  font-size: .82rem;
+  opacity: .7;
+  transition: opacity .2s;
+}
+.h-get-style:hover { opacity: 1; }
 
 /* ─── Responsive ─── */
 @media (max-width: 960px) {
@@ -455,6 +463,7 @@ a { color: inherit; text-decoration: none; }
   .h-why-grid { grid-template-columns: 1fr; }
   .h-hero-btns { flex-direction: column; }
   .h-hero-btns a { width: 100%; }
+  .h-get-style { width: 100%; text-align: center; margin-top: 12px; }
   .h-cta-btns { flex-direction: column; align-items: center; }
   .h-cta-btns a { width: 100%; max-width: 320px; }
   .h-cta-frame { padding: 36px 24px; }

@@ -307,6 +307,17 @@ textarea { resize: vertical; min-height: 160px; }
   opacity: .9;
 }
 
+/* ─── Pricing Highlight Benefit ─── */
+.pricing-highlight {
+  font-size: .84rem; font-weight: 700; color: var(--accent);
+  text-align: center; margin: 0 0 14px;
+  padding: 8px 14px;
+  background: rgba(199,144,88,.08);
+  border: 1px solid rgba(199,144,88,.12);
+  border-radius: 8px;
+  letter-spacing: .02em;
+}
+
 /* ─── Industry Niche Cards ─── */
 .niche-card-grid {
   display: grid; grid-template-columns: repeat(4, 1fr);

@@ -42,18 +42,26 @@ a { color: inherit; text-decoration: none; }
 .g-demo-bar {
   background: var(--bg-alt);
   border-bottom: 1px solid var(--line);
-  padding: 10px 0;
+  padding: 9px 0;
   text-align: center;
-  font-size: .76rem;
-  color: var(--muted);
+  font-size: .74rem;
+  color: var(--faint);
   letter-spacing: .04em;
 }
 .g-demo-bar a {
   color: var(--accent); font-weight: 600;
-  border-bottom: 1px solid rgba(192,120,142,.3);
-  transition: border-color .2s;
+  transition: color .2s;
 }
-.g-demo-bar a:hover { border-color: var(--accent); }
+.g-demo-bar a:hover { color: var(--text); }
+
+/* ─── Get This Style CTA ─── */
+.g-get-style {
+  margin-top: 18px;
+  font-size: .82rem;
+  opacity: .65;
+  transition: opacity .2s;
+}
+.g-get-style:hover { opacity: 1; }
 
 /* ─── Nav ─── */
 .g-nav {
@@ -359,6 +367,7 @@ a { color: inherit; text-decoration: none; }
   .g-hero { padding: 80px 0 72px; }
   .g-hero-btns { flex-direction: column; align-items: center; }
   .g-hero-btns a { width: 100%; max-width: 300px; }
+  .g-get-style { width: 100%; max-width: 300px; text-align: center; margin-top: 12px; }
   .g-section { padding: 64px 0; }
   .g-exp { padding: 64px 0; }
   .g-testimonial { padding: 64px 0; }
