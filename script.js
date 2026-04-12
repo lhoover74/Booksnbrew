@@ -94,27 +94,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (packageParam || styleParam) {
     const projectTypeSelect = document.getElementById('quote-project-type');
+    const budgetSelect = document.getElementById('quote-budget');
+    const detailsField = document.getElementById('quote-details');
     const styleInput = document.getElementById('selectedStyle');
 
     if (projectTypeSelect && packageParam) {
-      const packageMap = {
-        'starter': 'Starter Website (1\u20132 pages) \u2014 $125',
-        'business': 'Business Website (3\u20135 pages) \u2014 $300',
-        'premium': 'Premium Website (5\u20138 pages) \u2014 $600'
+      const packagePrefixMap = {
+        starter: 'starter website',
+        business: 'business website',
+        premium: 'premium website'
       };
-      const val = packageMap[packageParam];
-      if (val) {
-        for (const opt of projectTypeSelect.options) {
-          if (opt.text === val) {
-            projectTypeSelect.value = opt.value;
-            break;
-          }
+      const prefix = packagePrefixMap[packageParam];
+      if (prefix) {
+        const matchedOption = Array.from(projectTypeSelect.options).find((opt) =>
+          opt.text.toLowerCase().startsWith(prefix)
+        );
+        if (matchedOption) {
+          projectTypeSelect.value = matchedOption.value;
         }
+      }
+    }
+
+    if (budgetSelect && packageParam === 'starter') {
+      const starterBudget = Array.from(budgetSelect.options).find((opt) =>
+        opt.text.includes('$125')
+      );
+      if (starterBudget) {
+        budgetSelect.value = starterBudget.value;
       }
     }
 
     if (styleInput && styleParam) {
       styleInput.value = styleParam;
+    }
+
+    if (detailsField && !detailsField.value.trim()) {
+      const styleLabelMap = {
+        hair: 'hair stylist',
+        barber: 'barber',
+        beauty: 'beauty'
+      };
+      const styleLabel = styleLabelMap[styleParam] || 'business';
+      const starterLine = packageParam === 'starter'
+        ? ' I want to start with the Starter Website at $125 and upgrade features as needed.'
+        : '';
+
+      if (styleParam) {
+        detailsField.value =
+          'I want a ' + styleLabel + ' style website similar to the demo.' + starterLine;
+      } else if (starterLine) {
+        detailsField.value =
+          'I want to start with the Starter Website at $125 and upgrade features as needed.';
+      }
     }
   }
 });
