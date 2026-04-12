@@ -531,3 +531,67 @@ textarea { resize: vertical; min-height: 160px; }
   .port-page-grid { grid-template-columns: 1fr; }
   .port-feat-cta, .port-page-cta { width: 100%; }
 }
+
+/* ─── Urgency Note ─── */
+.urgency-note {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  margin: 16px 0 0;
+  letter-spacing: .03em;
+}
+
+/* ─── Deposit Note ─── */
+.deposit-note {
+  font-size: .78rem;
+  color: var(--muted);
+  text-align: center;
+  margin: 0 0 8px;
+  letter-spacing: .02em;
+  font-weight: 500;
+}
+
+/* ─── Trust Points ─── */
+.trust-points {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 28px;
+  margin: 0 auto 32px;
+  max-width: 720px;
+}
+.trust-point {
+  font-size: .9rem;
+  color: var(--muted);
+  padding: 6px 0;
+}
+
+/* ─── Trust Rating ─── */
+.trust-rating {
+  text-align: center;
+  margin: 0 auto 10px;
+}
+.trust-stars {
+  color: var(--accent);
+  font-size: 1.5rem;
+  letter-spacing: .06em;
+  display: block;
+  margin-bottom: 8px;
+}
+.trust-rating p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ─── Portal Grid ─── */
+.portal-grid .card {
+  text-align: center;
+}
+
+@media (max-width: 780px) {
+  .trust-points { flex-direction: column; align-items: center; gap: 4px; }
+}

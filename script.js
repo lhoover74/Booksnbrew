@@ -86,4 +86,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  // Smart flow: prefill quote form from URL params (demo → quote)
+  const params = new URLSearchParams(window.location.search);
+  const packageParam = params.get('package');
+  const styleParam = params.get('style');
+
+  if (packageParam || styleParam) {
+    const projectTypeSelect = document.getElementById('quote-project-type');
+    const styleInput = document.getElementById('selectedStyle');
+
+    if (projectTypeSelect && packageParam) {
+      const packageMap = {
+        'starter': 'Starter Website (1\u20132 pages) \u2014 $125',
+        'business': 'Business Website (3\u20135 pages) \u2014 $300',
+        'premium': 'Premium Website (5\u20138 pages) \u2014 $600'
+      };
+      const val = packageMap[packageParam];
+      if (val) {
+        for (const opt of projectTypeSelect.options) {
+          if (opt.text === val) {
+            projectTypeSelect.value = opt.value;
+            break;
+          }
+        }
+      }
+    }
+
+    if (styleInput && styleParam) {
+      styleInput.value = styleParam;
+    }
+  }
 });
