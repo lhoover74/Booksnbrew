@@ -588,8 +588,115 @@ textarea { resize: vertical; min-height: 160px; }
 }
 
 /* ─── Portal Grid ─── */
-.portal-grid .card {
-  text-align: center;
+.portal-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+.portal-features { display: flex; flex-direction: column; }
+.portal-bullets {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; gap: 22px;
+}
+.portal-bullets li {
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.portal-bullet-icon {
+  font-size: 1.4rem; flex-shrink: 0;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(199,144,88,.08);
+  border: 1px solid rgba(199,144,88,.12);
+  border-radius: 12px;
+}
+.portal-bullets li strong {
+  display: block; margin-bottom: 4px; color: var(--text); font-size: .95rem;
+}
+.portal-bullets li span:not(.portal-bullet-icon) {
+  font-size: .88rem; color: var(--muted); line-height: 1.65;
+}
+
+/* ─── Portal Mock UI ─── */
+.portal-mock-card {
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(38,25,22,.82), rgba(22,16,14,.88));
+  box-shadow:
+    0 0 0 1px rgba(199,144,88,.06) inset,
+    0 28px 70px rgba(0,0,0,.45),
+    0 0 80px rgba(199,144,88,.06);
+}
+.portal-mock-header {
+  display: flex; align-items: center; gap: 7px;
+  padding: 14px 20px;
+  background: rgba(15,10,8,.5);
+  border-bottom: 1px solid var(--line);
+}
+.portal-mock-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(199,144,88,.25);
+}
+.portal-mock-dot:first-child { background: rgba(199,144,88,.5); }
+.portal-mock-title {
+  margin-left: auto;
+  font-size: .72rem; letter-spacing: .16em; font-weight: 700;
+  text-transform: uppercase; color: var(--accent); opacity: .7;
+}
+.portal-mock-body { padding: 24px 22px; }
+.portal-mock-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.portal-mock-row:last-of-type { border-bottom: none; }
+.portal-mock-label {
+  font-size: .84rem; color: var(--muted); font-weight: 500;
+}
+.portal-mock-value {
+  font-size: .88rem; font-weight: 700; color: var(--text);
+}
+.portal-mock-status {
+  color: var(--accent);
+  padding: 3px 12px;
+  background: rgba(199,144,88,.1);
+  border: 1px solid rgba(199,144,88,.18);
+  border-radius: 8px;
+  font-size: .78rem; letter-spacing: .04em;
+}
+.portal-mock-paid {
+  color: #6bc77a;
+  font-size: .82rem;
+}
+.portal-mock-pending {
+  color: var(--accent);
+  font-size: .82rem;
+  opacity: .7;
+}
+.portal-mock-progress {
+  margin-top: 20px; text-align: center;
+}
+.portal-mock-progress span {
+  font-size: .76rem; color: var(--muted); margin-top: 8px; display: block;
+  letter-spacing: .04em;
+}
+.portal-mock-bar {
+  height: 6px; border-radius: 3px;
+  background: rgba(199,144,88,.12);
+  overflow: hidden;
+}
+.portal-mock-fill {
+  width: 65%; height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), #d3a16a);
+}
+
+@media (max-width: 1080px) {
+  .portal-split { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 780px) {
+  .portal-mock-card { margin: 0 auto; max-width: 400px; }
 }
 
 @media (max-width: 780px) {
