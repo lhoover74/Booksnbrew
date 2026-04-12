@@ -150,7 +150,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ─── Section base ─── */
-.g-section { padding: 110px 0; }
+.g-section { padding: 96px 0; }
 .g-section-alt { background: var(--bg-alt); }
 .g-label {
   display: inline-flex; align-items: center; gap: 10px;
@@ -224,7 +224,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ─── Experience / Value Items ─── */
-.g-exp { padding: 110px 0; }
+.g-exp { padding: 96px 0; }
 .g-exp-items { display: flex; flex-direction: column; gap: 0; }
 .g-exp-item {
   padding: 34px 0 34px 28px;
@@ -252,7 +252,7 @@ a { color: inherit; text-decoration: none; }
 /* ─── Testimonial — full-bleed dark contrast section ─── */
 .g-testimonial {
   background: #2c1420;
-  padding: 110px 0;
+  padding: 96px 0;
   position: relative; overflow: hidden;
 }
 /* Soft rose glow in dark bg */
@@ -359,10 +359,10 @@ a { color: inherit; text-decoration: none; }
   .g-hero { padding: 80px 0 72px; }
   .g-hero-btns { flex-direction: column; align-items: center; }
   .g-hero-btns a { width: 100%; max-width: 300px; }
-  .g-section { padding: 72px 0; }
-  .g-exp { padding: 72px 0; }
-  .g-testimonial { padding: 80px 0; }
-  .g-cta { padding: 72px 0 80px; }
+  .g-section { padding: 64px 0; }
+  .g-exp { padding: 64px 0; }
+  .g-testimonial { padding: 64px 0; }
+  .g-cta { padding: 64px 0 72px; }
   .g-exp-item p { padding-left: 0; }
   .g-cta-frame { padding: 36px 24px; }
   .g-cta-btns { flex-direction: column; align-items: center; }

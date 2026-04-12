@@ -175,7 +175,7 @@ a { color: inherit; text-decoration: none; }
 .b-band-sep { opacity: .45; }
 
 /* ─── Section base ─── */
-.b-section { padding: 88px 0; }
+.b-section { padding: 96px 0; }
 .b-overline {
   display: inline-flex; align-items: center; gap: 12px;
   margin-bottom: 14px;
